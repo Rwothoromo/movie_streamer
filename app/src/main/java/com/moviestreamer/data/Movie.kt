@@ -28,7 +28,7 @@ data class Movie(
     val voteCount: Int?,
     
     // For our purposes, we'll use Archive.org URLs for actual playback
-    var videoUrl: String? = null
+    val videoUrl: String? = null
 ) {
     fun getPosterUrl(): String? {
         return posterPath?.let { "https://image.tmdb.org/t/p/w500$it" }
