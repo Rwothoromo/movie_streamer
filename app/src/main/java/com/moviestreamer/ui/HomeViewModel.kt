@@ -34,7 +34,7 @@ class HomeViewModel : ViewModel() {
                 _uiState.value = _uiState.value.copy(isLoading = true, error = null)
                 
                 // Load public domain movies (always available)
-                val publicDomain = PublicDomainMovies.getPublicDomainMovies()
+                val publicDomain = PublicDomainMovies.publicDomainMovies
                 
                 // Try to load TMDB data if API key is configured
                 var popular = emptyList<Movie>()
@@ -47,7 +47,6 @@ class HomeViewModel : ViewModel() {
                     placeholderPatterns.none { apiKey.trim().uppercase().startsWith(it) }
                 
                 if (isValidKey) {
-                if (apiKey.isNotBlank() && !apiKey.trim().startsWith("YOUR_")) {
                     try {
                         popular = ApiClient.tmdbApi.getPopularMovies(
                             apiKey = apiKey,

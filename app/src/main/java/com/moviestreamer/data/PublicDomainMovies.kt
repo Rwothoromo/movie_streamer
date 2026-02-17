@@ -94,5 +94,4 @@ object PublicDomainMovies {
         )
     )
     
-    fun getPublicDomainMovies(): List<Movie> = publicDomainMovies
 }

@@ -30,13 +30,16 @@ class MainActivity : ComponentActivity() {
             HomeScreen(
                 viewModel = viewModel,
                 onMovieClick = { movie ->
-                    // Only play movies with video URLs (public domain content)
+                    // Only play movies with video URLs (public domain content from Archive.org)
+                    // TMDB movies are for browsing metadata only—they have no playable URLs
                     if (movie.videoUrl != null) {
                         val intent = Intent(this, PlayerActivity::class.java).apply {
                             putExtra("VIDEO_URL", movie.videoUrl)
                             putExtra("MOVIE_TITLE", movie.title)
                         }
                         startActivity(intent)
+                    } else {
+                        Log.i(TAG, "Movie '${movie.title}' has no playback URL (TMDB movies are metadata-only)")
                     }
                 },
                 modifier = Modifier.fillMaxSize()

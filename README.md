@@ -57,15 +57,25 @@ buildConfigField("String", "TMDB_API_KEY", "\"your_actual_api_key\"")
 ./gradlew assembleDebug
 ```
 
-### 4. Install on Android TV
+### 4. Install and Run
 
-Connect your Android TV device or start an emulator:
+**One-command build, install, and launch:**
 
 ```bash
-./gradlew installDebug
+./gradlew :app:installDebug && adb shell am start -n com.moviestreamer/.ui.MainActivity
 ```
 
-Or use Android Studio to build and deploy.
+**Or separately:**
+
+```bash
+# Install the app
+./gradlew :app:installDebug
+
+# Launch the app
+adb shell am start -n com.moviestreamer/.ui.MainActivity
+```
+
+Alternatively, use Android Studio to build and deploy directly.
 
 ## Project Structure
 
@@ -100,9 +110,11 @@ app/
 
 ### Available Content
 
-1. **Public Domain Classics**: Classic films from Archive.org (always available)
-2. **Popular Movies**: Current popular movies (requires TMDB API key)
-3. **Top Rated Movies**: Highly rated films (requires TMDB API key)
+1. **Public Domain Classics**: Classic films from Archive.org (always available, playable)
+2. **Popular Movies**: Current popular movies metadata from TMDB (browse only, no playback)
+3. **Top Rated Movies**: Highly rated films metadata from TMDB (browse only, no playback)
+
+**Note**: Only public domain movies have playback URLs. TMDB integration provides metadata and posters for browsing, but actual streaming requires legal video sources.
 
 ### Video Playback Controls
 
