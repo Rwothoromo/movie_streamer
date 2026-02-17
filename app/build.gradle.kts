@@ -14,7 +14,9 @@ android {
         versionCode = 1
         versionName = "1.0"
 
-        // TMDB API key from local.properties for security, with free fallback key
+        // TMDB API key from local.properties for security
+        // Fallback is a free public key for demo purposes only - replace with your own key
+        // Get your key from: https://www.themoviedb.org/settings/api
         val tmdbApiKey = project.findProperty("tmdb.api.key")?.toString() ?: "3892d03413cf19a621283087d1b3d18b"
         buildConfigField("String", "TMDB_API_KEY", "\"$tmdbApiKey\"")
     }
