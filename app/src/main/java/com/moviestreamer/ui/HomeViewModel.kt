@@ -16,6 +16,8 @@ data class HomeUiState(
     val popularMovies: List<Movie> = emptyList(),
     val topRatedMovies: List<Movie> = emptyList(),
     val publicDomainMovies: List<Movie> = emptyList(),
+    val searchQuery: String = "",
+    val searchResults: List<Movie> = emptyList(),
     val isLoading: Boolean = true,
     val error: String? = null
 )
@@ -23,6 +25,8 @@ data class HomeUiState(
 class HomeViewModel : ViewModel() {
     private val _uiState = MutableStateFlow(HomeUiState())
     val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
+    
+    private var allMovies: List<Movie> = emptyList()
     
     init {
         loadMovies()
@@ -69,6 +73,9 @@ class HomeViewModel : ViewModel() {
                     publicDomainMovies = publicDomain,
                     isLoading = false
                 )
+                
+                // Store all movies for search functionality
+                allMovies = popular + topRated + publicDomain
             } catch (e: Exception) {
                 _uiState.value = _uiState.value.copy(
                     isLoading = false,
@@ -80,5 +87,24 @@ class HomeViewModel : ViewModel() {
     
     fun retry() {
         loadMovies()
+    }
+    
+    fun updateSearchQuery(query: String) {
+        _uiState.value = _uiState.value.copy(searchQuery = query)
+        performSearch(query)
+    }
+    
+    private fun performSearch(query: String) {
+        if (query.isBlank()) {
+            _uiState.value = _uiState.value.copy(searchResults = emptyList())
+            return
+        }
+        
+        val filteredMovies = allMovies.filter { movie ->
+            movie.title.contains(query, ignoreCase = true) ||
+            movie.overview?.contains(query, ignoreCase = true) == true
+        }
+        
+        _uiState.value = _uiState.value.copy(searchResults = filteredMovies)
     }
 }

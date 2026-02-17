@@ -3,6 +3,7 @@ package com.moviestreamer.ui
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
@@ -39,6 +40,7 @@ class MainActivity : ComponentActivity() {
                         }
                         startActivity(intent)
                     } else {
+                        Toast.makeText(this, "This movie is for browsing only (no playback available)", Toast.LENGTH_SHORT).show()
                         Log.i(TAG, "Movie '${movie.title}' has no playback URL (TMDB movies are metadata-only)")
                     }
                 },
