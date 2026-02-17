@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.WindowInsetsController
 import android.widget.FrameLayout
+import android.widget.TextView
 import android.app.Activity
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
@@ -15,10 +16,12 @@ import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.PlayerView
+import com.moviestreamer.R
 
 class PlayerActivity : Activity() {
     private var player: ExoPlayer? = null
     private var playerView: PlayerView? = null
+    private var errorTextView: TextView? = null
     private var videoUrl: String? = null
     private var movieTitle: String? = null
     private var playWhenReady = true
@@ -48,12 +51,28 @@ class PlayerActivity : Activity() {
             controllerHideOnTouch = true
         }
 
+        // Create error text view
+        errorTextView = TextView(this).apply {
+            layoutParams = FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.WRAP_CONTENT,
+                FrameLayout.LayoutParams.WRAP_CONTENT
+            ).apply {
+                gravity = android.view.Gravity.CENTER
+            }
+            text = ""
+            textSize = 18f
+            setTextColor(android.graphics.Color.WHITE)
+            visibility = View.GONE
+        }
+
         val frameLayout = FrameLayout(this).apply {
             layoutParams = ViewGroup.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT
             )
+            setBackgroundColor(android.graphics.Color.BLACK)
             addView(playerView)
+            addView(errorTextView)
         }
 
         setContentView(frameLayout)
@@ -121,12 +140,18 @@ class PlayerActivity : Activity() {
 
                             Player.STATE_BUFFERING -> {
                                 // Player is buffering
+                                hideError()
                             }
 
                             Player.STATE_READY -> {
                                 // Player is ready
+                                hideError()
                             }
                         }
+                    }
+
+                    override fun onPlayerError(error: androidx.media3.common.PlaybackException) {
+                        showError(getString(R.string.video_error))
                     }
                 })
             }
@@ -198,5 +223,22 @@ class PlayerActivity : Activity() {
         private fun releasePlayer() {
             player?.release()
             player = null
+        }
+
+        private fun showError(message: String) {
+            runOnUiThread {
+                errorTextView?.apply {
+                    text = message
+                    visibility = View.VISIBLE
+                }
+                playerView?.visibility = View.GONE
+            }
+        }
+
+        private fun hideError() {
+            runOnUiThread {
+                errorTextView?.visibility = View.GONE
+                playerView?.visibility = View.VISIBLE
+            }
         }
     }

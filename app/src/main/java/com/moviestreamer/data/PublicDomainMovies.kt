@@ -6,25 +6,25 @@ object PublicDomainMovies {
     val publicDomainMovies = listOf(
         Movie(
             id = 90001,
-            title = "Night of the Living Dead",
-            overview = "A classic horror film about zombies attacking a farmhouse. This iconic 1968 film is in the public domain.",
+            title = "Big Buck Bunny",
+            overview = "Big Buck Bunny is a short computer-animated comedy film by the Blender Institute. It is licensed under Creative Commons Attribution 3.0.",
             posterPath = null,
             backdropPath = null,
-            releaseDate = "1968-10-01",
-            voteAverage = 7.5,
-            voteCount = 1000,
-            videoUrl = "https://archive.org/download/night_of_the_living_dead/night_of_the_living_dead_512kb.mp4"
+            releaseDate = "2008-04-10",
+            voteAverage = 8.5,
+            voteCount = 500,
+            videoUrl = "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
         ),
         Movie(
             id = 90002,
-            title = "Plan 9 from Outer Space",
-            overview = "Aliens resurrect dead humans as zombies to stop humanity from creating a doomsday weapon. A cult classic from 1959.",
+            title = "Elephant's Dream",
+            overview = "Elephants Dream is a 2006 short film, the first open-source animated film created by the Orange Open Movie Project.",
             posterPath = null,
             backdropPath = null,
-            releaseDate = "1959-07-22",
-            voteAverage = 4.0,
-            voteCount = 500,
-            videoUrl = "https://archive.org/download/Plan9FromOuterSpace/Plan_9_from_Outer_Space_512kb.mp4"
+            releaseDate = "2006-03-24",
+            voteAverage = 7.8,
+            voteCount = 300,
+            videoUrl = "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4"
         ),
         Movie(
             id = 90003,
@@ -35,7 +35,7 @@ object PublicDomainMovies {
             releaseDate = "1922-03-04",
             voteAverage = 8.0,
             voteCount = 800,
-            videoUrl = "https://archive.org/download/nosferatu_een_symfonie_des_grauens/nosferatu_een_symfonie_des_grauens_512kb.mp4"
+            videoUrl = null // Video currently unavailable
         ),
         Movie(
             id = 90004,
@@ -46,7 +46,7 @@ object PublicDomainMovies {
             releaseDate = "1920-02-26",
             voteAverage = 8.0,
             voteCount = 700,
-            videoUrl = "https://archive.org/download/TheCabinetOfDr.Caligari/TheCabinetOfDr.Caligari_512kb.mp4"
+            videoUrl = null // Video currently unavailable
         ),
         Movie(
             id = 90005,
@@ -57,7 +57,7 @@ object PublicDomainMovies {
             releaseDate = "1927-01-10",
             voteAverage = 8.5,
             voteCount = 1200,
-            videoUrl = "https://archive.org/download/Metropolis_20100119/metropolis_512kb.mp4"
+            videoUrl = null // Video currently unavailable
         ),
         Movie(
             id = 90006,
@@ -68,7 +68,7 @@ object PublicDomainMovies {
             releaseDate = "1940-01-11",
             voteAverage = 7.8,
             voteCount = 600,
-            videoUrl = "https://archive.org/download/His_Girl_Friday/His_Girl_Friday_512kb.mp4"
+            videoUrl = null // Video currently unavailable
         ),
         Movie(
             id = 90007,
@@ -79,7 +79,7 @@ object PublicDomainMovies {
             releaseDate = "1925-09-06",
             voteAverage = 7.6,
             voteCount = 550,
-            videoUrl = "https://archive.org/download/the_phantom_of_the_opera/the_phantom_of_the_opera_512kb.mp4"
+            videoUrl = null // Video currently unavailable
         ),
         Movie(
             id = 90008,
@@ -90,7 +90,7 @@ object PublicDomainMovies {
             releaseDate = "1902-09-01",
             voteAverage = 8.2,
             voteCount = 900,
-            videoUrl = "https://archive.org/download/Le_Voyage_dans_la_lune/Le_Voyage_dans_la_lune_512kb.mp4"
+            videoUrl = null // Video currently unavailable
         )
     )
     
