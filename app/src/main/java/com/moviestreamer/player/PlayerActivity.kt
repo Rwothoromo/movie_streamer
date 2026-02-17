@@ -157,11 +157,8 @@ class PlayerActivity : AppCompatActivity() {
     
     override fun onResume() {
         super.onResume()
-        // If player already exists, restore saved state
-        player?.let {
-            it.seekTo(playbackPosition)
-            it.playWhenReady = playWhenReady
-        }
+        // State is already restored in initializePlayer() when player is recreated
+        // No additional action needed here
     }
     
     override fun onPause() {

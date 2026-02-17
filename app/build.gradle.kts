@@ -15,9 +15,10 @@ android {
         versionName = "1.0"
 
         // TMDB API key from local.properties for security
-        // Fallback is a free public key for demo purposes only - replace with your own key
-        // Get your key from: https://www.themoviedb.org/settings/api
-        val tmdbApiKey = project.findProperty("tmdb.api.key")?.toString() ?: "3892d03413cf19a621283087d1b3d18b"
+        // To use the app with TMDB data, get a free key from: https://www.themoviedb.org/settings/api
+        // Then add to local.properties: tmdb.api.key=YOUR_ACTUAL_KEY
+        // The app works without TMDB by showing public domain content only
+        val tmdbApiKey = project.findProperty("tmdb.api.key")?.toString() ?: "YOUR_TMDB_API_KEY_HERE"
         buildConfigField("String", "TMDB_API_KEY", "\"$tmdbApiKey\"")
     }
 
