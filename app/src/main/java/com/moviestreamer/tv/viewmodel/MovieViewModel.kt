@@ -15,8 +15,9 @@ sealed class UiState {
     data class Error(val message: String) : UiState()
 }
 
-class MovieViewModel : ViewModel() {
-    private val repository = MovieRepository()
+class MovieViewModel(
+    private val repository: MovieRepository = MovieRepository()
+) : ViewModel() {
     
     private val _uiState = MutableStateFlow<UiState>(UiState.Loading)
     val uiState: StateFlow<UiState> = _uiState.asStateFlow()

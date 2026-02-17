@@ -49,6 +49,8 @@ dependencies {
     implementation("androidx.leanback:leanback:1.0.0")
     
     // Jetpack Compose for TV
+    // Note: Using alpha versions as stable TV Compose libraries are not yet available
+    // For production apps, monitor for stable releases
     implementation("androidx.tv:tv-foundation:1.0.0-alpha10")
     implementation("androidx.tv:tv-material:1.0.0-alpha10")
     implementation("androidx.compose.ui:ui:1.5.4")
