@@ -171,7 +171,7 @@ class PlayerActivity : AppCompatActivity() {
     
     override fun onResume() {
         super.onResume()
-        // Don't force playWhenReady to true; respect the saved state
+        // State is preserved in playWhenReady/playbackPosition fields and restored in initializePlayer()
     }
     
     override fun onPause() {
@@ -190,7 +190,8 @@ class PlayerActivity : AppCompatActivity() {
     
     override fun onDestroy() {
         super.onDestroy()
-        // Player already released in onStop
+        // Ensure player is released if not already done in onStop
+        releasePlayer()
     }
     
     private fun releasePlayer() {
