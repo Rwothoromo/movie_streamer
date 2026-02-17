@@ -53,6 +53,12 @@ class PlayerActivity : AppCompatActivity() {
         // Hide system UI for immersive fullscreen
         hideSystemUI()
         
+        if (videoUrl.isNullOrBlank()) {
+            // No valid video URL provided; close the activity to avoid initializing the player with null
+            finish()
+            return
+        }
+        
         initializePlayer()
     }
     
