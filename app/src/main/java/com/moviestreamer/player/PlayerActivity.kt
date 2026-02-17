@@ -1,5 +1,8 @@
 package com.moviestreamer.player
 
+import android.os.Bundle
+import android.view.KeyEvent
+import android.view.ViewGroup
 import android.os.Build
 import android.os.Bundle
 import android.view.KeyEvent
@@ -67,6 +70,11 @@ class PlayerActivity : AppCompatActivity() {
     private fun hideSystemUI() {
         WindowCompat.setDecorFitsSystemWindows(window, false)
         
+        // Use WindowInsetsControllerCompat for consistent behavior across API levels
+        val controller = WindowCompat.getInsetsController(window, window.decorView)
+        controller.apply {
+            hide(WindowInsetsCompat.Type.systemBars())
+            systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             window.insetsController?.let { controller ->
                 controller.hide(
@@ -171,6 +179,8 @@ class PlayerActivity : AppCompatActivity() {
     
     override fun onResume() {
         super.onResume()
+        // State is already restored in initializePlayer() when player is recreated
+        // No additional action needed here
         // State is preserved in playWhenReady/playbackPosition fields and restored in initializePlayer()
     }
     

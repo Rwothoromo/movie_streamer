@@ -41,6 +41,12 @@ class HomeViewModel : ViewModel() {
                 var topRated = emptyList<Movie>()
                 
                 val apiKey = BuildConfig.TMDB_API_KEY
+                // Check if API key is valid (not a placeholder pattern)
+                val placeholderPatterns = listOf("YOUR_", "REPLACE", "PLACEHOLDER", "EXAMPLE")
+                val isValidKey = apiKey.isNotBlank() && 
+                    placeholderPatterns.none { apiKey.trim().uppercase().startsWith(it) }
+                
+                if (isValidKey) {
                 if (apiKey.isNotBlank() && !apiKey.trim().startsWith("YOUR_")) {
                     try {
                         popular = ApiClient.tmdbApi.getPopularMovies(
