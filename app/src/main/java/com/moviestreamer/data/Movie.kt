@@ -1,4 +1,4 @@
-package com.moviestreamer.tv.model
+package com.moviestreamer.data
 
 import com.google.gson.annotations.SerializedName
 
@@ -10,7 +10,7 @@ data class Movie(
     val title: String,
     
     @SerializedName("overview")
-    val overview: String,
+    val overview: String?,
     
     @SerializedName("poster_path")
     val posterPath: String?,
@@ -18,33 +18,28 @@ data class Movie(
     @SerializedName("backdrop_path")
     val backdropPath: String?,
     
-    @SerializedName("vote_average")
-    val voteAverage: Double,
-    
     @SerializedName("release_date")
-    val releaseDate: String,
+    val releaseDate: String?,
     
-    // For demo purposes, we'll use a trailer URL
+    @SerializedName("vote_average")
+    val voteAverage: Double?,
+    
+    @SerializedName("vote_count")
+    val voteCount: Int?,
+    
+    // For our purposes, we'll use Archive.org URLs for actual playback
     val videoUrl: String? = null
 ) {
-    fun getPosterUrl(): String {
-        return if (posterPath != null) {
-            "https://image.tmdb.org/t/p/w500$posterPath"
-        } else {
-            ""
-        }
+    fun getPosterUrl(): String? {
+        return posterPath?.let { "https://image.tmdb.org/t/p/w500$it" }
     }
     
-    fun getBackdropUrl(): String {
-        return if (backdropPath != null) {
-            "https://image.tmdb.org/t/p/w780$backdropPath"
-        } else {
-            ""
-        }
+    fun getBackdropUrl(): String? {
+        return backdropPath?.let { "https://image.tmdb.org/t/p/w1280$it" }
     }
 }
 
-data class MovieResponse(
+data class MoviesResponse(
     @SerializedName("page")
     val page: Int,
     

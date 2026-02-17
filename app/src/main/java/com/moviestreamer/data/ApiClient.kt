@@ -1,16 +1,22 @@
-package com.moviestreamer.tv.network
+package com.moviestreamer.data
 
+import com.moviestreamer.BuildConfig
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
 
-object RetrofitClient {
-    private const val BASE_URL = "https://api.themoviedb.org/3/"
+object ApiClient {
+    private const val TMDB_BASE_URL = "https://api.themoviedb.org/3/"
     
     private val loggingInterceptor = HttpLoggingInterceptor().apply {
-        level = HttpLoggingInterceptor.Level.BODY
+        // Only log full bodies in debug builds
+        level = if (BuildConfig.DEBUG) {
+            HttpLoggingInterceptor.Level.BODY
+        } else {
+            HttpLoggingInterceptor.Level.BASIC
+        }
     }
     
     private val okHttpClient = OkHttpClient.Builder()
@@ -20,10 +26,10 @@ object RetrofitClient {
         .build()
     
     private val retrofit = Retrofit.Builder()
-        .baseUrl(BASE_URL)
+        .baseUrl(TMDB_BASE_URL)
         .client(okHttpClient)
         .addConverterFactory(GsonConverterFactory.create())
         .build()
     
-    val tmdbApiService: TMDBApiService = retrofit.create(TMDBApiService::class.java)
+    val tmdbApi: TmdbApi = retrofit.create(TmdbApi::class.java)
 }

@@ -1,8 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Movie Streamer</string>
+    <string name="browse_title">Browse Movies</string>
     <string name="popular_movies">Popular Movies</string>
-    <string name="loading">Loading…</string>
+    <string name="top_rated_movies">Top Rated Movies</string>
+    <string name="public_domain_movies">Public Domain Classics</string>
     <string name="play">Play</string>
     <string name="error_loading">Error loading content</string>
+    <string name="no_description">No description available</string>
 </resources>

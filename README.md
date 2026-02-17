@@ -1,212 +1,195 @@
-# Movie Streamer - Android TV Streaming App
+# Movie Streamer - Android TV App
 
-A modern Android TV streaming application built with Jetpack Compose for TV and ExoPlayer (Media3). This app demonstrates the "10-foot UI" design pattern optimized for TV viewing with D-Pad navigation.
+A modern Android TV streaming application built with Kotlin, Jetpack Compose for TV, and ExoPlayer.
 
 ## Features
 
-- **Jetpack Compose for TV**: Modern declarative UI framework for Android TV
-- **ExoPlayer (Media3)**: Industry-standard video playback engine with adaptive streaming support (HLS/DASH)
-- **TMDB Integration**: Fetches movie metadata, posters, and information from The Movie Database API
-- **10-Foot UI Design**: D-Pad navigable interface with clear focus states
-- **Focus Animation**: Cards scale and highlight when focused for better UX
-- **Horizontal Scrolling Ribbons**: Netflix-style layout with categorized movie rows
+- **10-Foot UI Design**: Optimized for TV viewing with D-pad/remote navigation
+- **Jetpack Compose for TV**: Modern declarative UI with clear focus states
+- **ExoPlayer Integration**: High-quality video playback
+- **TMDB API**: Movie metadata for popular and top-rated films
+- **Public Domain Content**: Legal streaming from Archive.org
+- **D-pad Navigation**: Full remote control support with focus indicators
 
 ## Tech Stack
 
-- **Language**: Kotlin
-- **UI Framework**: Jetpack Compose for TV
-- **Video Player**: ExoPlayer (Media3)
-- **Networking**: Retrofit with OkHttp
-- **Image Loading**: Coil Compose
-- **Architecture**: MVVM with Repository Pattern
-- **Async**: Kotlin Coroutines and Flow
+- **Kotlin**: Modern Android development
+- **Jetpack Compose for TV**: Declarative UI framework for Android TV
+- **ExoPlayer (Media3)**: Video playback engine
+- **Retrofit**: HTTP client for API calls
+- **Coil**: Image loading library
+- **TMDB API**: Movie metadata and information
+- **Archive.org**: Public domain video sources
 
 ## Prerequisites
 
-- Android Studio Hedgehog (2023.1.1) or later
-- JDK 11 or higher
-- Android SDK with API level 21 (minimum) to 34 (target)
-- TMDB API Key (free from https://www.themoviedb.org/settings/api)
+- Android Studio Hedgehog or later
+- Android SDK 34
+- JDK 17
+- TMDB API Key (optional but recommended)
 
 ## Setup Instructions
 
-### 1. Get TMDB API Key
+### 1. Clone the Repository
 
-1. Create a free account at [The Movie Database](https://www.themoviedb.org/)
-2. Go to Settings → API
-3. Request an API key (select "Developer" option)
-4. Copy your API key (v3 auth)
-
-### 2. Configure the App
-
-1. Clone this repository
-2. Open the project in Android Studio
-3. Open `app/src/main/java/com/moviestreamer/tv/repository/MovieRepository.kt`
-4. Replace `YOUR_TMDB_API_KEY_HERE` with your actual TMDB API key:
-
-```kotlin
-private val apiKey = "your_actual_api_key_here"
+```bash
+git clone https://github.com/Rwothoromo/movie_streamer.git
+cd movie_streamer
 ```
 
-### 3. Build and Run
+### 2. Configure TMDB API Key (Optional)
 
-1. Connect an Android TV device or start an Android TV emulator
-2. Click "Run" in Android Studio or execute:
+To display movie metadata from TMDB:
+
+1. Get a free API key from [TMDB](https://www.themoviedb.org/settings/api)
+2. Open `app/build.gradle.kts`
+3. Replace `YOUR_TMDB_API_KEY_HERE` with your actual API key:
+
+```kotlin
+buildConfigField("String", "TMDB_API_KEY", "\"your_actual_api_key\"")
+```
+
+**Note**: The app will work without a TMDB API key by showing only public domain content.
+
+### 3. Build the Project
+
+```bash
+./gradlew assembleDebug
+```
+
+### 4. Install on Android TV
+
+Connect your Android TV device or start an emulator:
 
 ```bash
 ./gradlew installDebug
 ```
+
+Or use Android Studio to build and deploy.
 
 ## Project Structure
 
 ```
 app/
 ├── src/main/
-│   ├── java/com/moviestreamer/tv/
-│   │   ├── model/              # Data models
-│   │   │   └── Movie.kt        # Movie data class and API response
-│   │   ├── network/            # Networking layer
-│   │   │   ├── TMDBApiService.kt    # Retrofit API interface
-│   │   │   └── RetrofitClient.kt    # Retrofit configuration
-│   │   ├── repository/         # Data repository
-│   │   │   └── MovieRepository.kt   # Movie data source
-│   │   ├── viewmodel/          # ViewModels
-│   │   │   └── MovieViewModel.kt    # UI state management
-│   │   ├── ui/                 # Compose UI components
-│   │   │   ├── MovieCard.kt    # TV-optimized movie card
-│   │   │   ├── HomeScreen.kt   # Main browsing screen
-│   │   │   ├── PlayerScreen.kt # Video player screen
-│   │   │   └── theme/          # App theme and typography
-│   │   ├── MainActivity.kt     # Main entry point
-│   │   └── PlayerActivity.kt   # Video player activity
-│   ├── res/                    # Android resources
-│   └── AndroidManifest.xml     # App configuration
-└── build.gradle.kts            # Build configuration
+│   ├── java/com/moviestreamer/
+│   │   ├── data/              # Data models and API clients
+│   │   │   ├── Movie.kt       # Movie data model
+│   │   │   ├── TmdbApi.kt     # TMDB API interface
+│   │   │   ├── ApiClient.kt   # Retrofit client
+│   │   │   └── PublicDomainMovies.kt  # Public domain content
+│   │   ├── ui/                # UI components
+│   │   │   ├── MainActivity.kt
+│   │   │   ├── HomeScreen.kt
+│   │   │   ├── MovieCard.kt
+│   │   │   └── HomeViewModel.kt
+│   │   └── player/            # Video player
+│   │       └── PlayerActivity.kt
+│   ├── res/                   # Resources
+│   └── AndroidManifest.xml
+└── build.gradle.kts
 ```
 
-## Key Components
+## Usage
 
-### Movie Card Component
+### Navigation
 
-The `MovieCard.kt` demonstrates a TV-optimized card with:
-- Focus state animation (scales up when focused)
-- Clear border highlighting
-- Smooth transitions
-- Poster image loading with Coil
+- **D-pad/Arrow Keys**: Navigate between movies
+- **Enter/Center**: Select a movie to play
+- **Back**: Return to the previous screen or exit player
 
-### ExoPlayer Integration
+### Available Content
 
-The `PlayerScreen.kt` shows how to:
-- Create and configure ExoPlayer instance
-- Handle HLS/DASH adaptive streaming
-- Display player controls
-- Manage player lifecycle (prepare, play, release)
+1. **Public Domain Classics**: Classic films from Archive.org (always available)
+2. **Popular Movies**: Current popular movies (requires TMDB API key)
+3. **Top Rated Movies**: Highly rated films (requires TMDB API key)
 
-### Network Layer
+### Video Playback Controls
 
-The app uses Retrofit for API calls:
-- `TMDBApiService.kt`: Defines API endpoints
-- `RetrofitClient.kt`: Configures Retrofit with logging
-- `MovieRepository.kt`: Handles data fetching and error handling
+- **Play/Pause**: Center button or Play/Pause
+- **Fast Forward**: Fast Forward button
+- **Rewind**: Rewind button
+- **Back**: Exit player and return to browse
 
 ## Content Sources
 
-### Metadata APIs (Integrated)
+### Archive.org (Public Domain)
 
-- **TMDB**: Movie information, posters, ratings, cast info
+The app includes curated public domain films from Archive.org:
+- Night of the Living Dead (1968)
+- Metropolis (1927)
+- Nosferatu (1922)
+- And more classic films
 
-### Video Sources (Examples for Testing)
+These films are in the public domain and legally available for streaming.
 
-For testing purposes, you can use these legal free video sources:
+### TMDB (Metadata Only)
 
-1. **HLS Test Streams**:
-   - `https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8`
+The Movie Database (TMDB) provides metadata including:
+- Movie titles and descriptions
+- Poster images
+- Release dates
+- Ratings
 
-2. **Public Domain Content**:
-   - Internet Archive API: `https://archive.org/`
-   - YouTube Data API for trailers
+**Note**: TMDB movies are for browsing only. Actual video playback requires legal sources.
 
-3. **IPTV Playlists**:
-   - GitHub IPTV-org project for free-to-air channels
+## Legal Notice
 
-**Note**: Currently, the app uses a demo HLS stream. To integrate real movie streams, you need legal content sources.
+This app only streams content from legal sources:
 
-## Important Compliance Note
+1. **Public Domain Films**: Content from Archive.org that is in the public domain
+2. **No Piracy**: The app does not include or support pirated content scrapers
+3. **Metadata Only**: TMDB integration is for movie information only, not streaming
 
-⚠️ **Legal Notice**: If you plan to publish this app on Google Play Store:
+For Play Store deployment, ensure all content sources have appropriate licensing and rights.
 
-- Ensure you have rights to all streamed content
-- Do not use scrapers for copyrighted material
-- Stick to public domain or Creative Commons licensed content
-- Apps facilitating piracy will be banned from the Play Store
+## Development
 
-## D-Pad Navigation
-
-The app is fully navigable with a TV remote:
-
-- **Up/Down/Left/Right**: Navigate between items
-- **Center/OK**: Select item
-- **Back**: Return to previous screen
-
-## Building for Production
-
-### Create a signed APK
-
-1. Generate a keystore
-2. Configure signing in `app/build.gradle.kts`
-3. Run:
+### Building the App
 
 ```bash
+# Debug build
+./gradlew assembleDebug
+
+# Release build
 ./gradlew assembleRelease
 ```
 
-### Optimize for TV
+### Testing on Android TV
 
-The app already includes:
-- `android.software.leanback` feature requirement
-- Landscape orientation lock
-- TV launcher intent filter
-- Touch screen set as not required
+1. Enable Developer Options on your Android TV
+2. Enable USB Debugging
+3. Connect via USB or WiFi (adb connect)
+4. Install using `./gradlew installDebug`
 
-## Troubleshooting
+### Customization
 
-### API Key Issues
+#### Adding More Public Domain Content
 
-If you see an error about loading content:
-1. Verify your API key is correctly set in `MovieRepository.kt`
-2. Check your internet connection
-3. Verify TMDB API service is accessible
+Edit `app/src/main/java/com/moviestreamer/data/PublicDomainMovies.kt` to add more films from Archive.org.
 
-### Video Playback Issues
+#### Styling
 
-- Ensure the video URL is a valid HLS (.m3u8) or DASH stream
-- Check internet connectivity
-- Some streams may require CORS headers or specific configuration
-
-## Future Enhancements
-
-Potential improvements for this app:
-
-- Add more content categories (Top Rated, Upcoming, Search)
-- Implement proper video URL fetching from legal APIs
-- Add user authentication and profiles
-- Integrate with more content providers
-- Add parental controls
-- Implement watchlist functionality
-- Add subtitle support
-- Integrate with YouTube API for trailers
-
-## License
-
-This project is for educational purposes. Ensure you comply with all content licensing and distribution laws in your jurisdiction.
-
-## Resources
-
-- [Jetpack Compose for TV](https://developer.android.com/jetpack/compose/tv)
-- [ExoPlayer Documentation](https://developer.android.com/guide/topics/media/exoplayer)
-- [TMDB API Documentation](https://developers.themoviedb.org/3)
-- [Android TV Guidelines](https://developer.android.com/training/tv)
+Modify colors and themes in `app/src/main/res/values/`:
+- `colors.xml`: Color palette
+- `themes.xml`: App theme
+- `strings.xml`: Text resources
 
 ## Contributing
 
-Contributions are welcome! Please ensure your code follows the existing style and includes appropriate documentation.
+Contributions are welcome! Please ensure:
+1. All content sources are legal and properly licensed
+2. Code follows Kotlin style guidelines
+3. UI maintains 10-foot design principles
+4. D-pad navigation works correctly
+
+## License
+
+This project is open source. See LICENSE file for details.
+
+## Acknowledgments
+
+- [TMDB](https://www.themoviedb.org/) for movie metadata
+- [Archive.org](https://archive.org/) for public domain content
+- [ExoPlayer](https://exoplayer.dev/) for video playback
+- Android Jetpack team for Compose for TV
