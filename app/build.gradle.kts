@@ -14,7 +14,9 @@ android {
         versionCode = 1
         versionName = "1.0"
 
-        buildConfigField("String", "TMDB_API_KEY", "\"YOUR_TMDB_API_KEY_HERE\"")
+        // TMDB API key from local.properties for security
+        val tmdbApiKey = project.findProperty("tmdb.api.key")?.toString() ?: "YOUR_TMDB_API_KEY_HERE"
+        buildConfigField("String", "TMDB_API_KEY", "\"$tmdbApiKey\"")
     }
 
     buildTypes {

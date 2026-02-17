@@ -1,5 +1,6 @@
 package com.moviestreamer.ui
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.moviestreamer.BuildConfig
@@ -39,20 +40,21 @@ class HomeViewModel : ViewModel() {
                 var popular = emptyList<Movie>()
                 var topRated = emptyList<Movie>()
                 
-                if (BuildConfig.TMDB_API_KEY != "YOUR_TMDB_API_KEY_HERE") {
+                val apiKey = BuildConfig.TMDB_API_KEY
+                if (apiKey.isNotBlank() && !apiKey.trim().startsWith("YOUR_")) {
                     try {
                         popular = ApiClient.tmdbApi.getPopularMovies(
-                            apiKey = BuildConfig.TMDB_API_KEY,
+                            apiKey = apiKey,
                             page = 1
                         ).results
                         
                         topRated = ApiClient.tmdbApi.getTopRatedMovies(
-                            apiKey = BuildConfig.TMDB_API_KEY,
+                            apiKey = apiKey,
                             page = 1
                         ).results
                     } catch (e: Exception) {
                         // If TMDB fails, we still have public domain content
-                        e.printStackTrace()
+                        Log.e("HomeViewModel", "Failed to load TMDB data", e)
                     }
                 }
                 

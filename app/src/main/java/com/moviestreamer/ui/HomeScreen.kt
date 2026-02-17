@@ -11,8 +11,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.moviestreamer.R
 import com.moviestreamer.data.Movie
 
 @Composable
@@ -37,7 +39,7 @@ fun HomeScreen(
             
             uiState.error != null -> {
                 Text(
-                    text = "Error: ${uiState.error}",
+                    text = stringResource(R.string.error_loading),
                     modifier = Modifier
                         .align(Alignment.Center)
                         .padding(16.dp),
@@ -54,7 +56,7 @@ fun HomeScreen(
                     // App Title
                     item {
                         Text(
-                            text = "Movie Streamer",
+                            text = stringResource(R.string.app_name),
                             modifier = Modifier.padding(start = 48.dp, bottom = 24.dp),
                             color = Color.White,
                             fontSize = 48.sp
@@ -65,7 +67,7 @@ fun HomeScreen(
                     if (uiState.publicDomainMovies.isNotEmpty()) {
                         item {
                             MovieRow(
-                                title = "Public Domain Classics",
+                                title = stringResource(R.string.public_domain_movies),
                                 movies = uiState.publicDomainMovies,
                                 onMovieClick = onMovieClick
                             )
@@ -76,7 +78,7 @@ fun HomeScreen(
                     if (uiState.popularMovies.isNotEmpty()) {
                         item {
                             MovieRow(
-                                title = "Popular Movies",
+                                title = stringResource(R.string.popular_movies),
                                 movies = uiState.popularMovies,
                                 onMovieClick = onMovieClick
                             )
@@ -87,7 +89,7 @@ fun HomeScreen(
                     if (uiState.topRatedMovies.isNotEmpty()) {
                         item {
                             MovieRow(
-                                title = "Top Rated Movies",
+                                title = stringResource(R.string.top_rated_movies),
                                 movies = uiState.topRatedMovies,
                                 onMovieClick = onMovieClick
                             )

@@ -19,10 +19,15 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import com.moviestreamer.R
 import com.moviestreamer.data.Movie
 
 @Composable
@@ -32,29 +37,32 @@ fun MovieCard(
     modifier: Modifier = Modifier
 ) {
     var isFocused by remember { mutableStateOf(false) }
+    val focusColor = colorResource(R.color.focus_highlight)
+    val surfaceColor = colorResource(R.color.surface)
     
     Card(
         modifier = modifier
             .width(200.dp)
             .height(300.dp)
             .padding(8.dp)
+            .border(
+                border = if (isFocused) {
+                    BorderStroke(4.dp, focusColor)
+                } else {
+                    BorderStroke(0.dp, Color.Transparent)
+                },
+                shape = RoundedCornerShape(8.dp)
+            )
             .focusable()
             .onFocusChanged { focusState ->
                 isFocused = focusState.isFocused
             }
             .clickable { onMovieClick(movie) }
-            .then(
-                if (isFocused) {
-                    Modifier.border(
-                        border = BorderStroke(4.dp, Color(0xFFBB86FC)),
-                        shape = RoundedCornerShape(8.dp)
-                    )
-                } else {
-                    Modifier
-                }
-            ),
+            .semantics {
+                role = Role.Button
+            },
         colors = CardDefaults.cardColors(
-            containerColor = Color(0xFF1E1E1E)
+            containerColor = surfaceColor
         ),
         shape = RoundedCornerShape(8.dp)
     ) {
@@ -129,7 +137,7 @@ fun MovieRow(
             contentPadding = PaddingValues(horizontal = 48.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            items(movies) { movie ->
+            items(movies, key = { it.id }) { movie ->
                 MovieCard(
                     movie = movie,
                     onMovieClick = onMovieClick

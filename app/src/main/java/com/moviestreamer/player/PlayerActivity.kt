@@ -21,6 +21,8 @@ class PlayerActivity : AppCompatActivity() {
     private var playerView: PlayerView? = null
     private var videoUrl: String? = null
     private var movieTitle: String? = null
+    private var playWhenReady = true
+    private var playbackPosition = 0L
     
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -28,6 +30,12 @@ class PlayerActivity : AppCompatActivity() {
         // Get video URL from intent
         videoUrl = intent.getStringExtra("VIDEO_URL")
         movieTitle = intent.getStringExtra("MOVIE_TITLE")
+        
+        // Validate video URL
+        if (videoUrl.isNullOrBlank()) {
+            finish()
+            return
+        }
         
         // Create player view programmatically
         playerView = PlayerView(this).apply {
@@ -94,7 +102,8 @@ class PlayerActivity : AppCompatActivity() {
                 val mediaItem = MediaItem.fromUri(url)
                 exoPlayer.setMediaItem(mediaItem)
                 exoPlayer.prepare()
-                exoPlayer.playWhenReady = true
+                exoPlayer.playWhenReady = playWhenReady
+                exoPlayer.seekTo(playbackPosition)
             }
             
             // Add listener for playback state
@@ -168,12 +177,16 @@ class PlayerActivity : AppCompatActivity() {
     
     override fun onResume() {
         super.onResume()
-        player?.playWhenReady = true
+        // Don't force playWhenReady to true; respect the saved state
     }
     
     override fun onPause() {
         super.onPause()
-        player?.playWhenReady = false
+        player?.let {
+            playWhenReady = it.playWhenReady
+            playbackPosition = it.currentPosition
+            it.playWhenReady = false
+        }
     }
     
     override fun onStop() {
@@ -183,7 +196,7 @@ class PlayerActivity : AppCompatActivity() {
     
     override fun onDestroy() {
         super.onDestroy()
-        releasePlayer()
+        // Player already released in onStop
     }
     
     private fun releasePlayer() {
