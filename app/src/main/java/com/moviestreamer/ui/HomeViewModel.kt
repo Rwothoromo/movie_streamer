@@ -47,6 +47,7 @@ class HomeViewModel : ViewModel() {
                     placeholderPatterns.none { apiKey.trim().uppercase().startsWith(it) }
                 
                 if (isValidKey) {
+                if (apiKey.isNotBlank() && !apiKey.trim().startsWith("YOUR_")) {
                     try {
                         popular = ApiClient.tmdbApi.getPopularMovies(
                             apiKey = apiKey,

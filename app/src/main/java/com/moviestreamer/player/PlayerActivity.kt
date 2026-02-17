@@ -3,6 +3,12 @@ package com.moviestreamer.player
 import android.os.Bundle
 import android.view.KeyEvent
 import android.view.ViewGroup
+import android.os.Build
+import android.os.Bundle
+import android.view.KeyEvent
+import android.view.View
+import android.view.ViewGroup
+import android.view.WindowInsetsController
 import android.widget.FrameLayout
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.WindowCompat
@@ -69,6 +75,22 @@ class PlayerActivity : AppCompatActivity() {
         controller.apply {
             hide(WindowInsetsCompat.Type.systemBars())
             systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            window.insetsController?.let { controller ->
+                controller.hide(
+                    android.view.WindowInsets.Type.statusBars() or
+                    android.view.WindowInsets.Type.navigationBars()
+                )
+                controller.systemBarsBehavior = 
+                    WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+            }
+        } else {
+            @Suppress("DEPRECATION")
+            window.decorView.systemUiVisibility = (
+                View.SYSTEM_UI_FLAG_FULLSCREEN
+                or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+            )
         }
     }
     
@@ -159,6 +181,7 @@ class PlayerActivity : AppCompatActivity() {
         super.onResume()
         // State is already restored in initializePlayer() when player is recreated
         // No additional action needed here
+        // State is preserved in playWhenReady/playbackPosition fields and restored in initializePlayer()
     }
     
     override fun onPause() {

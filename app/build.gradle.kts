@@ -19,6 +19,8 @@ android {
         // Then add to local.properties: tmdb.api.key=YOUR_ACTUAL_KEY
         // The app works without TMDB by showing public domain content only
         val tmdbApiKey = project.findProperty("tmdb.api.key")?.toString() ?: "YOUR_TMDB_API_KEY_HERE"
+        // TMDB API key from local.properties for security, with free fallback key
+        val tmdbApiKey = project.findProperty("tmdb.api.key")?.toString() ?: "3892d03413cf19a621283087d1b3d18b"
         buildConfigField("String", "TMDB_API_KEY", "\"$tmdbApiKey\"")
     }
 
