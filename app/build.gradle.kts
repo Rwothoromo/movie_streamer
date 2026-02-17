@@ -54,6 +54,10 @@ android {
 
 dependencies {
     // Compose for TV
+    // Note: As of Feb 2024, Compose for TV is still in alpha
+    // These are the latest stable alpha versions available
+    // For production, monitor for beta/stable releases at:
+    // https://developer.android.com/jetpack/androidx/releases/tv
     implementation("androidx.tv:tv-foundation:1.0.0-alpha10")
     implementation("androidx.tv:tv-material:1.0.0-alpha10")
     

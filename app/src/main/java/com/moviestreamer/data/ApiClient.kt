@@ -1,5 +1,6 @@
 package com.moviestreamer.data
 
+import com.moviestreamer.BuildConfig
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
@@ -10,7 +11,12 @@ object ApiClient {
     private const val TMDB_BASE_URL = "https://api.themoviedb.org/3/"
     
     private val loggingInterceptor = HttpLoggingInterceptor().apply {
-        level = HttpLoggingInterceptor.Level.BODY
+        // Only log full bodies in debug builds
+        level = if (BuildConfig.DEBUG) {
+            HttpLoggingInterceptor.Level.BODY
+        } else {
+            HttpLoggingInterceptor.Level.BASIC
+        }
     }
     
     private val okHttpClient = OkHttpClient.Builder()
