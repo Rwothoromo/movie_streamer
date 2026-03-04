@@ -13,10 +13,13 @@ import com.moviestreamer.BuildConfig
 import com.moviestreamer.data.Season
 import com.moviestreamer.data.TvShow
 import com.moviestreamer.player.PlayerActivity
+import org.koin.androidx.compose.koinViewModel
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 sealed class Screen {
     object Home : Screen()
+    object Search : Screen()
+    object Genre : Screen()
     data class TvDetail(val tvShow: TvShow) : Screen()
     data class TvSeason(val tvShow: TvShow, val seasonNumber: Int, val season: Season?) : Screen()
 }
@@ -37,6 +40,8 @@ class MainActivity : ComponentActivity() {
         setContent {
             var currentScreen by remember { mutableStateOf<Screen>(Screen.Home) }
             var seasonLoading by remember { mutableStateOf(false) }
+            val searchViewModel: SearchViewModel = koinViewModel()
+            val genreViewModel: GenreViewModel = koinViewModel()
 
             when (val screen = currentScreen) {
                 is Screen.Home -> {
@@ -59,6 +64,46 @@ class MainActivity : ComponentActivity() {
                         onTvShowClick = { tvShow ->
                             currentScreen = Screen.TvDetail(tvShow)
                         },
+                        onSearchClick = { currentScreen = Screen.Search },
+                        onGenreClick = { currentScreen = Screen.Genre },
+                        modifier = Modifier.fillMaxSize()
+                    )
+                }
+                is Screen.Search -> {
+                    SearchScreen(
+                        viewModel = searchViewModel,
+                        onMovieClick = { movie ->
+                            if (movie.videoUrl != null) {
+                                val intent = Intent(this, PlayerActivity::class.java).apply {
+                                    putExtra("VIDEO_URL", movie.videoUrl)
+                                    putExtra("MOVIE_TITLE", movie.title)
+                                }
+                                startActivity(intent)
+                            } else {
+                                Toast.makeText(this, "This movie is for browsing only (no playback available)", Toast.LENGTH_SHORT).show()
+                            }
+                        },
+                        onTvShowClick = { tvShow -> currentScreen = Screen.TvDetail(tvShow) },
+                        onBack = { currentScreen = Screen.Home },
+                        modifier = Modifier.fillMaxSize()
+                    )
+                }
+                is Screen.Genre -> {
+                    GenreScreen(
+                        viewModel = genreViewModel,
+                        onMovieClick = { movie ->
+                            if (movie.videoUrl != null) {
+                                val intent = Intent(this, PlayerActivity::class.java).apply {
+                                    putExtra("VIDEO_URL", movie.videoUrl)
+                                    putExtra("MOVIE_TITLE", movie.title)
+                                }
+                                startActivity(intent)
+                            } else {
+                                Toast.makeText(this, "This movie is for browsing only (no playback available)", Toast.LENGTH_SHORT).show()
+                            }
+                        },
+                        onTvShowClick = { tvShow -> currentScreen = Screen.TvDetail(tvShow) },
+                        onBack = { currentScreen = Screen.Home },
                         modifier = Modifier.fillMaxSize()
                     )
                 }

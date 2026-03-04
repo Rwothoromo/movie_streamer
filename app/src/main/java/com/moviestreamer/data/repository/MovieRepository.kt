@@ -13,4 +13,8 @@ interface MovieRepository {
     suspend fun getAiringTodayTvShows(page: Int = 1): Result<List<TvShow>>
     suspend fun getTvShowDetails(tvId: Int): Result<TvShow>
     suspend fun getTvSeasonDetails(tvId: Int, seasonNumber: Int): Result<Season>
+    suspend fun searchMovies(query: String): Result<List<Movie>>
+    suspend fun searchTvShows(query: String): Result<List<TvShow>>
+    suspend fun getMoviesByGenre(genreId: Int): Result<List<Movie>>
+    suspend fun getTvShowsByGenre(genreId: Int): Result<List<TvShow>>
 }

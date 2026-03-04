@@ -82,4 +82,17 @@ interface TmdbApi {
         @Query("query") query: String,
         @Query("page") page: Int = 1
     ): TvShowsResponse
+
+    // Discover by genre
+    @GET("discover/movie")
+    suspend fun discoverMoviesByGenre(
+        @Query("with_genres") genreId: Int,
+        @Query("page") page: Int = 1
+    ): MoviesResponse
+
+    @GET("discover/tv")
+    suspend fun discoverTvShowsByGenre(
+        @Query("with_genres") genreId: Int,
+        @Query("page") page: Int = 1
+    ): TvShowsResponse
 }
