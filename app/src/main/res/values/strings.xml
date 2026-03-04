@@ -36,4 +36,6 @@
     <string name="play_next_episode">Play Next Episode</string>
     <string name="cancel">Cancel</string>
     <string name="next_episode_countdown">Next episode in %d…</string>
+    <string name="classic_tv_episodes">Classic TV Episodes</string>
+    <string name="free_live_channels">Free Live Channels</string>
 </resources>

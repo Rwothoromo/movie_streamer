@@ -19,6 +19,9 @@ import com.moviestreamer.domain.usecase.SearchMoviesUseCase
 import com.moviestreamer.domain.usecase.SearchTvShowsUseCase
 import com.moviestreamer.domain.usecase.ToggleFavoriteMovieUseCase
 import com.moviestreamer.domain.usecase.ToggleFavoriteTvShowUseCase
+import com.moviestreamer.domain.usecase.GetPublicDomainTvEpisodesUseCase
+import com.moviestreamer.domain.usecase.GetFreeIptvChannelsUseCase
+import com.moviestreamer.domain.usecase.GetMovieTrailerUseCase
 import org.koin.dsl.module
 
 val useCaseModule = module {
@@ -41,4 +44,7 @@ val useCaseModule = module {
     factory { SaveContinueWatchingUseCase(get()) }
     factory { GetMoviesByGenreUseCase(get()) }
     factory { GetTvShowsByGenreUseCase(get()) }
+    factory { GetPublicDomainTvEpisodesUseCase(get()) }
+    factory { GetFreeIptvChannelsUseCase(get()) }
+    factory { GetMovieTrailerUseCase(get()) }
 }

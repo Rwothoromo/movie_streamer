@@ -52,4 +52,15 @@ class MovieRepositoryImpl(private val tmdbApi: TmdbApi) : MovieRepository {
     override suspend fun getTvShowsByGenre(genreId: Int): Result<List<TvShow>> = runCatching {
         tmdbApi.discoverTvShowsByGenre(genreId).results
     }
+
+    override fun getPublicDomainTvEpisodes(): List<Movie> =
+        PublicDomainMovies.publicDomainTvEpisodes
+
+    override fun getFreeIptvChannels(): List<Movie> =
+        PublicDomainMovies.freeIptvChannels
+
+    override suspend fun getMovieTrailerKey(movieId: Int): Result<String?> = runCatching {
+        tmdbApi.getMovieVideos(movieId).results
+            .firstOrNull { it.isYouTubeTrailer() }?.key
+    }
 }

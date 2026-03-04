@@ -124,6 +124,28 @@ fun HomeScreen(
                             )
                         }
                     }
+
+                    // Free Classic TV Episodes
+                    if (uiState.publicDomainTvEpisodes.isNotEmpty()) {
+                        item {
+                            MovieRow(
+                                title = stringResource(R.string.classic_tv_episodes),
+                                movies = uiState.publicDomainTvEpisodes,
+                                onMovieClick = onMovieClick
+                            )
+                        }
+                    }
+
+                    // Free Live Channels (IPTV)
+                    if (uiState.freeIptvChannels.isNotEmpty()) {
+                        item {
+                            MovieRow(
+                                title = stringResource(R.string.free_live_channels),
+                                movies = uiState.freeIptvChannels,
+                                onMovieClick = onMovieClick
+                            )
+                        }
+                    }
                     
                     // Popular Movies (from TMDB)
                     if (uiState.popularMovies.isNotEmpty()) {
