@@ -38,64 +38,64 @@ object StreamingCatalog {
             title = "Nosferatu (1922)",
             description = "Landmark German Expressionist vampire film by F. W. Murnau. Public domain (pre-1928).",
             posterUrl = "https://upload.wikimedia.org/wikipedia/commons/thumb/1/14/Nosferatu%2C_eine_Symphonie_des_Grauens_%281922%29.jpg/500px-Nosferatu%2C_eine_Symphonie_des_Grauens_%281922%29.jpg",
-            url = "https://archive.org/download/Nosferatu_1922/Nosferatu_1922.mp4",
-            provider = StreamingProvider.ARCHIVE_ORG
+            url = "https://archive.org/download/nosferatu-eng./Nosferatu%20(Eng)..mp4",
+            provider = StreamingProvider.OTHER
         ),
         DirectStream(
             id = "pd_cabinet_dr_caligari",
             title = "The Cabinet of Dr. Caligari (1920)",
             description = "German Expressionist silent film by Robert Wiene. Public domain (pre-1928).",
             posterUrl = null,
-            url = "https://archive.org/download/TheCabinetOfDrCaligari/the_cabinet_of_dr_caligari_512kb.mp4",
-            provider = StreamingProvider.ARCHIVE_ORG
+            url = "https://archive.org/download/the-cabinet-of-dr.-caligari-1920-full-movie/The%20Cabinet%20of%20Dr.%20Caligari%20(1920)%20FULL%20MOVIE.mp4",
+            provider = StreamingProvider.OTHER
         ),
         DirectStream(
             id = "pd_metropolis",
             title = "Metropolis (1927)",
             description = "Fritz Lang's groundbreaking science fiction epic. Public domain (pre-1928).",
             posterUrl = null,
-            url = "https://archive.org/download/Metropolis_1927/Metropolis_1927_512kb.mp4",
-            provider = StreamingProvider.ARCHIVE_ORG
+            url = "https://archive.org/download/metropolis-1927-4-k-u-rnemls-bwry/Metropolis%20(1927)%204K%20%5BuRNEmlsBWRY%5D.mp4",
+            provider = StreamingProvider.OTHER
         ),
         DirectStream(
             id = "pd_his_girl_friday",
             title = "His Girl Friday (1940)",
             description = "Classic screwball comedy by Howard Hawks. US public domain (copyright not renewed).",
             posterUrl = null,
-            url = "https://archive.org/download/HisGirlFriday/HisGirlFriday_512kb.mp4",
-            provider = StreamingProvider.ARCHIVE_ORG
+            url = "https://archive.org/download/HisGirlFriday/MoviePowderPresentsHisGirlFriday_512kb.mp4",
+            provider = StreamingProvider.OTHER
         ),
         DirectStream(
             id = "pd_trip_to_moon",
             title = "A Trip to the Moon (1902)",
             description = "Georges Méliès' pioneering science fiction film. Public domain (pre-1928).",
             posterUrl = null,
-            url = "https://archive.org/download/LeVoyageDansLaLune/LeVoyageDansLaLune_512kb.mp4",
-            provider = StreamingProvider.ARCHIVE_ORG
+            url = "https://archive.org/download/TripToTheMoon/TripToTheMoon_512kb.mp4",
+            provider = StreamingProvider.OTHER
         ),
         DirectStream(
             id = "pd_phantom_opera",
             title = "The Phantom of the Opera (1925)",
             description = "Classic silent horror film starring Lon Chaney. Public domain (pre-1928).",
             posterUrl = null,
-            url = "https://archive.org/download/ThePhantomOfTheOpera_201811/The_Phantom_of_the_Opera_512kb.mp4",
-            provider = StreamingProvider.ARCHIVE_ORG
+            url = "https://archive.org/download/thephantomoftheoperalonchaneyversion1929cutbfirelease/The%20Phantom%20Of%20The%20Opera%20(Lon%20Chaney%20Version%2C%201929%20Cut)%20(BFI%20Release).mp4",
+            provider = StreamingProvider.OTHER
         ),
         DirectStream(
             id = "pd_general",
             title = "The General (1926)",
             description = "Buster Keaton's acclaimed Civil War comedy. Public domain (pre-1928).",
             posterUrl = null,
-            url = "https://archive.org/download/TheGeneral_201512/The_General_512kb.mp4",
-            provider = StreamingProvider.ARCHIVE_ORG
+            url = "https://archive.org/download/The_General_Buster_Keaton/The_General_512kb.mp4",
+            provider = StreamingProvider.OTHER
         ),
         DirectStream(
             id = "pd_birth_of_nation",
             title = "Night of the Living Dead (1968)",
             description = "George Romero's seminal zombie horror film. Public domain (copyright formalities not met).",
             posterUrl = null,
-            url = "https://archive.org/download/night_of_the_living_dead/night_of_the_living_dead_512kb.mp4",
-            provider = StreamingProvider.ARCHIVE_ORG
+            url = "https://archive.org/download/Night_Of_The_Living_Dead_raw_HD_WS/NightOfTheLivingDeadWSInternationalPrint.mp4",
+            provider = StreamingProvider.OTHER
         )
     )
 
@@ -109,24 +109,24 @@ object StreamingCatalog {
             title = "The Cisco Kid — \"The Badman\" (1950)",
             description = "Classic Western TV series. Episode 1, Season 1. Public domain (copyright not renewed).",
             posterUrl = null,
-            url = "https://archive.org/download/cisco_kid_01_50_ep01/cisco_kid_01_50_ep01_512kb.mp4",
-            provider = StreamingProvider.ARCHIVE_ORG
+            url = "https://archive.org/download/cisco-kid-s-01-e-08-convict-story/Cisco%20Kid_S01E01_Bates%20Story.mp4",
+            provider = StreamingProvider.OTHER
         ),
         DirectStream(
             id = "tv_science_fiction_theatre_s1e1",
             title = "Science Fiction Theatre — \"Time Is Just a Place\" (1955)",
             description = "Classic US sci-fi anthology series. Public domain (copyright not renewed).",
             posterUrl = null,
-            url = "https://archive.org/download/science_fiction_theatre_01_55/science_fiction_theatre_01_55_512kb.mp4",
-            provider = StreamingProvider.ARCHIVE_ORG
+            url = "https://archive.org/download/science-fiction-theatre-x-4-season-1-1955/Science%20Fiction%20Theatre%20x%204%20Season%201%20(1955).mp4",
+            provider = StreamingProvider.OTHER
         ),
         DirectStream(
             id = "tv_rocky_jones_s1e1",
             title = "Rocky Jones, Space Ranger — \"Beyond the Curtain of Space\" (1954)",
             description = "Classic US science fiction TV series. Public domain (copyright not renewed).",
             posterUrl = null,
-            url = "https://archive.org/download/rocky_jones_space_ranger_01_54/rocky_jones_space_ranger_01_54_512kb.mp4",
-            provider = StreamingProvider.ARCHIVE_ORG
+            url = "https://archive.org/download/rocky-jones-beyond-the-curtain-of-space/Rocky%20Jones%20-%20Beyond%20the%20Curtain%20of%20Space.mp4",
+            provider = StreamingProvider.OTHER
         )
     )
 
