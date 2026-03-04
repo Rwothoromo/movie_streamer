@@ -145,4 +145,16 @@ class HomeViewModel(
             onResult(result.getOrNull())
         }
     }
+
+    /**
+     * Called when the app is opened via a deep link containing a movie id.
+     * Sets the search query so the matching movie surfaces in the UI.
+     */
+    fun requestMovieById(movieId: Int) {
+        val movie = allMovies.find { it.id == movieId } ?: return
+        _uiState.value = _uiState.value.copy(
+            searchQuery = movie.title,
+            searchResults = listOf(movie)
+        )
+    }
 }
