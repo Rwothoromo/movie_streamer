@@ -18,7 +18,8 @@
         android:name=".MovieStreamerApplication"
         android:allowBackup="false"
         android:icon="@drawable/ic_launcher"
-        android:label="Movie Streamer"
+        android:label="@string/app_name"
+        android:supportsRtl="true"
         android:theme="@style/Theme.MovieStreamer"
         android:banner="@drawable/ic_banner">
 

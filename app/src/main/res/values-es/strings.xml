@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Movie Streamer</string>
+    <string name="browse_title">Explorar películas</string>
+    <string name="popular_movies">Películas populares</string>
+    <string name="top_rated_movies">Mejor valoradas</string>
+    <string name="public_domain_movies">Clásicos de dominio público</string>
+    <string name="play">Reproducir</string>
+    <string name="error_loading">Error al cargar el contenido</string>
+    <string name="no_description">Sin descripción disponible</string>
+    <string name="search_hint">Buscar películas…</string>
+    <string name="search_results">Resultados de búsqueda</string>
+    <string name="no_search_results">No se encontraron películas</string>
+    <string name="video_error">Error de reproducción de vídeo</string>
+    <string name="popular_tv_shows">Series populares</string>
+    <string name="top_rated_tv_shows">Series mejor valoradas</string>
+    <string name="airing_today">En emisión hoy</string>
+    <string name="tv_detail_back">Atrás</string>
+    <string name="seasons">Temporadas</string>
+    <string name="season_number">Temporada %d</string>
+    <string name="episode_number">Episodio %d</string>
+    <string name="continue_watching">Continuar viendo</string>
+    <string name="skip_intro">Saltar intro</string>
+    <string name="retry">Reintentar</string>
+    <string name="play_next_episode">Reproducir siguiente episodio</string>
+    <string name="cancel">Cancelar</string>
+    <string name="next_episode_countdown">Siguiente episodio en %d…</string>
+    <string name="classic_tv_episodes">Episodios clásicos</string>
+    <string name="free_live_channels">Canales en directo gratuitos</string>
+    <string name="browse_by_genre">Explorar por género</string>
+    <string name="search_title">Buscar</string>
+    <string name="search_movies_and_tv">Buscar películas y series…</string>
+    <string name="favorites">Favoritos</string>
+    <string name="favorite_movies">Películas favoritas</string>
+    <string name="favorite_tv_shows">Series favoritas</string>
+    <string name="loading">Cargando…</string>
+    <string name="back">Atrás</string>
+    <string name="movie_poster_desc">Cartel de %s</string>
+    <string name="movie_rating_desc">Valoración: %.1f de 10</string>
+    <string name="play_movie_desc">Reproducir %s</string>
+    <string name="tv_show_poster_desc">Cartel de %s</string>
+</resources>

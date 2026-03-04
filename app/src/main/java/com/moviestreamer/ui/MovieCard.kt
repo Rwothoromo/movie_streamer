@@ -28,6 +28,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
@@ -46,7 +48,10 @@ fun MovieCard(
     var isFocused by remember { mutableStateOf(false) }
     val focusColor = colorResource(R.color.focus_highlight)
     val surfaceColor = colorResource(R.color.surface)
-    
+    val playableDesc = stringResource(R.string.play_movie_desc, movie.title)
+    val browseDesc = stringResource(R.string.movie_poster_desc, movie.title)
+    val cardContentDesc = if (movie.videoUrl != null) playableDesc else browseDesc
+
     Card(
         modifier = modifier
             .width(200.dp)
@@ -67,6 +72,7 @@ fun MovieCard(
             .clickable { onMovieClick(movie) }
             .semantics {
                 role = Role.Button
+                contentDescription = cardContentDesc
             },
         colors = CardDefaults.cardColors(
             containerColor = surfaceColor
@@ -84,7 +90,7 @@ fun MovieCard(
                 if (movie.getPosterUrl() != null) {
                     AsyncImage(
                         model = movie.getPosterUrl(),
-                        contentDescription = movie.title,
+                        contentDescription = stringResource(R.string.movie_poster_desc, movie.title),
                         modifier = Modifier.fillMaxSize(),
                         contentScale = ContentScale.Crop
                     )
@@ -92,7 +98,7 @@ fun MovieCard(
                     // Default movie thumbnail for movies without poster
                     androidx.compose.foundation.Image(
                         painter = painterResource(R.drawable.default_movie_thumbnail),
-                        contentDescription = movie.title,
+                        contentDescription = stringResource(R.string.movie_poster_desc, movie.title),
                         modifier = Modifier.fillMaxSize(),
                         contentScale = ContentScale.Crop
                     )

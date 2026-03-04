@@ -2,10 +2,12 @@ package com.moviestreamer.di
 
 import com.moviestreamer.BuildConfig
 import com.moviestreamer.data.AuthInterceptor
+import com.moviestreamer.data.LocaleInterceptor
 import com.moviestreamer.data.TmdbApi
 import okhttp3.CertificatePinner
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
+import org.koin.android.ext.koin.androidContext
 import org.koin.dsl.module
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -27,6 +29,7 @@ private val tmdbCertificatePinner = CertificatePinner.Builder()
 
 val networkModule = module {
     single { AuthInterceptor(apiKey = BuildConfig.TMDB_API_KEY) }
+    single { LocaleInterceptor(androidContext()) }
 
     single {
         HttpLoggingInterceptor().apply {
@@ -38,6 +41,7 @@ val networkModule = module {
     single {
         OkHttpClient.Builder()
             .addInterceptor(get<AuthInterceptor>())
+            .addInterceptor(get<LocaleInterceptor>())
             .addInterceptor(get<HttpLoggingInterceptor>())
             .certificatePinner(tmdbCertificatePinner)
             .connectTimeout(30, TimeUnit.SECONDS)
