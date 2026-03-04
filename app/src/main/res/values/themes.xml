@@ -6,4 +6,13 @@
         <item name="android:colorAccent">@color/accent</item>
         <item name="android:windowBackground">@color/background</item>
     </style>
+
+    <!-- AppCompat-based theme for PlayerActivity (AppCompatActivity requires this) -->
+    <style name="Theme.MovieStreamer.Player" parent="Theme.AppCompat.NoActionBar">
+        <item name="android:colorPrimary">@color/primary</item>
+        <item name="android:colorPrimaryDark">@color/primary_dark</item>
+        <item name="android:colorAccent">@color/accent</item>
+        <item name="android:windowBackground">@color/background</item>
+        <item name="android:windowFullscreen">true</item>
+    </style>
 </resources>
