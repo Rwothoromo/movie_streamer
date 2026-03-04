@@ -1,6 +1,7 @@
 package com.moviestreamer.ui
 
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
@@ -36,6 +37,9 @@ class MainActivity : ComponentActivity() {
                     "Alpha libraries may have breaking API changes or stability issues. " +
                     "Monitor https://developer.android.com/jetpack/androidx/releases/tv for stable releases.")
         }
+
+        // Handle deep links: moviestreamer://movie/{id} or https://moviestreamer.app/movie/{id}
+        handleDeepLink(intent)
         
         setContent {
             var currentScreen by remember { mutableStateOf<Screen>(Screen.Home) }
@@ -140,5 +144,36 @@ class MainActivity : ComponentActivity() {
     
     companion object {
         private const val TAG = "MainActivity"
+    }
+
+    // ── Deep link handling ────────────────────────────────────────────────────
+
+    private fun handleDeepLink(intent: Intent?) {
+        val uri: Uri = intent?.data ?: return
+        val movieId = extractMovieId(uri) ?: return
+        // viewModel will load content and the movie with this id can be highlighted/auto-played.
+        // For now log the intent and let the home screen handle it via state.
+        Log.i(TAG, "Deep link received for movie id: $movieId")
+        viewModel.requestMovieById(movieId)
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        handleDeepLink(intent)
+    }
+
+    private fun extractMovieId(uri: Uri): Int? {
+        // Handles:
+        //   moviestreamer://movie/12345
+        //   https://moviestreamer.app/movie/12345
+        val segments = uri.pathSegments
+        return when {
+            uri.scheme == "moviestreamer" -> uri.host?.toIntOrNull()
+                ?: segments.firstOrNull()?.toIntOrNull()
+            segments.size >= 2 && segments[segments.size - 2] == "movie" ->
+                segments.last().toIntOrNull()
+            else -> null
+        }
     }
 }

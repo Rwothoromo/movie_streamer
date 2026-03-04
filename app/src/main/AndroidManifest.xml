@@ -4,12 +4,12 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
-    <!-- Leanback feature for TV -->
+    <!-- Leanback feature for TV — not required so the app also installs on phones/tablets/Fire TV -->
     <uses-feature
         android:name="android.software.leanback"
-        android:required="true" />
+        android:required="false" />
 
-    <!-- Touch screen is not required -->
+    <!-- Touch screen is not required (TV, Fire TV) -->
     <uses-feature
         android:name="android.hardware.touchscreen"
         android:required="false" />
@@ -26,9 +26,33 @@
             android:name=".ui.MainActivity"
             android:exported="true"
             android:theme="@style/Theme.MovieStreamer">
+
+            <!-- Android TV launcher intent -->
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LEANBACK_LAUNCHER" />
+            </intent-filter>
+
+            <!-- Standard phone/tablet/Fire TV launcher intent -->
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+
+            <!-- Deep link: moviestreamer://movie/{id} -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="moviestreamer" android:host="movie" />
+            </intent-filter>
+
+            <!-- Deep link: https://moviestreamer.app/movie/{id} (App Links) -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="https" android:host="moviestreamer.app" android:pathPrefix="/movie/" />
             </intent-filter>
         </activity>
 
