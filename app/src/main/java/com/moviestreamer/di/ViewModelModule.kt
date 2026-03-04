@@ -22,7 +22,9 @@ val viewModelModule = module {
             getFavoriteTvShowsUseCase = get(),
             toggleFavoriteMovieUseCase = get(),
             toggleFavoriteTvShowUseCase = get(),
-            getContinueWatchingUseCase = get()
+            getContinueWatchingUseCase = get(),
+            getPublicDomainTvEpisodesUseCase = get(),
+            getFreeIptvChannelsUseCase = get()
         )
     }
     viewModel {

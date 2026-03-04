@@ -17,4 +17,7 @@ interface MovieRepository {
     suspend fun searchTvShows(query: String): Result<List<TvShow>>
     suspend fun getMoviesByGenre(genreId: Int): Result<List<Movie>>
     suspend fun getTvShowsByGenre(genreId: Int): Result<List<TvShow>>
+    fun getPublicDomainTvEpisodes(): List<Movie>
+    fun getFreeIptvChannels(): List<Movie>
+    suspend fun getMovieTrailerKey(movieId: Int): Result<String?>
 }

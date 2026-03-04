@@ -10,9 +10,12 @@ import com.moviestreamer.domain.usecase.GetAiringTodayTvShowsUseCase
 import com.moviestreamer.domain.usecase.GetContinueWatchingUseCase
 import com.moviestreamer.domain.usecase.GetFavoriteMoviesUseCase
 import com.moviestreamer.domain.usecase.GetFavoriteTvShowsUseCase
+import com.moviestreamer.domain.usecase.GetFreeIptvChannelsUseCase
+import com.moviestreamer.domain.usecase.GetMoviesByGenreUseCase
 import com.moviestreamer.domain.usecase.GetPopularMoviesUseCase
 import com.moviestreamer.domain.usecase.GetPopularTvShowsUseCase
 import com.moviestreamer.domain.usecase.GetPublicDomainMoviesUseCase
+import com.moviestreamer.domain.usecase.GetPublicDomainTvEpisodesUseCase
 import com.moviestreamer.domain.usecase.GetTopRatedMoviesUseCase
 import com.moviestreamer.domain.usecase.GetTopRatedTvShowsUseCase
 import com.moviestreamer.domain.usecase.GetTvSeasonDetailsUseCase
@@ -29,6 +32,8 @@ data class HomeUiState(
     val popularMovies: List<Movie> = emptyList(),
     val topRatedMovies: List<Movie> = emptyList(),
     val publicDomainMovies: List<Movie> = emptyList(),
+    val publicDomainTvEpisodes: List<Movie> = emptyList(),
+    val freeIptvChannels: List<Movie> = emptyList(),
     val popularTvShows: List<TvShow> = emptyList(),
     val topRatedTvShows: List<TvShow> = emptyList(),
     val airingTodayTvShows: List<TvShow> = emptyList(),
@@ -55,7 +60,9 @@ class HomeViewModel(
     private val getFavoriteTvShowsUseCase: GetFavoriteTvShowsUseCase,
     private val toggleFavoriteMovieUseCase: ToggleFavoriteMovieUseCase,
     private val toggleFavoriteTvShowUseCase: ToggleFavoriteTvShowUseCase,
-    private val getContinueWatchingUseCase: GetContinueWatchingUseCase
+    private val getContinueWatchingUseCase: GetContinueWatchingUseCase,
+    private val getPublicDomainTvEpisodesUseCase: GetPublicDomainTvEpisodesUseCase,
+    private val getFreeIptvChannelsUseCase: GetFreeIptvChannelsUseCase
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(HomeUiState())
     val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
@@ -99,6 +106,8 @@ class HomeViewModel(
                     popularMovies = popular,
                     topRatedMovies = topRated,
                     publicDomainMovies = publicDomain,
+                    publicDomainTvEpisodes = getPublicDomainTvEpisodesUseCase(),
+                    freeIptvChannels = getFreeIptvChannelsUseCase(),
                     popularTvShows = popularTv,
                     topRatedTvShows = topRatedTv,
                     airingTodayTvShows = airingToday,
