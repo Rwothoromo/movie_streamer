@@ -9,7 +9,8 @@ Movie Streamer is an Android TV application built with Kotlin that lets users br
 - **Language**: Kotlin
 - **UI Framework**: Jetpack Compose for TV (`androidx.tv:tv-foundation`, `androidx.tv:tv-material`)
 - **Video Playback**: ExoPlayer via Media3 (`androidx.media3`)
-- **Architecture**: MVVM with StateFlow
+- **Architecture**: Clean Architecture with MVVM, StateFlow, and Use Cases
+- **Dependency Injection**: Koin (`io.insert-koin:koin-android`)
 - **Networking**: Retrofit + OkHttp + Gson
 - **Image Loading**: Coil (`io.coil-kt:coil-compose`)
 - **Coroutines**: `kotlinx-coroutines-android`
@@ -20,18 +21,33 @@ Movie Streamer is an Android TV application built with Kotlin that lets users br
 
 ```
 app/src/main/java/com/moviestreamer/
-├── data/               # Data layer
-│   ├── ApiClient.kt    # Retrofit singleton
-│   ├── Movie.kt        # Movie data model
-│   ├── TmdbApi.kt      # TMDB REST interface
-│   └── PublicDomainMovies.kt  # Hard-coded public domain content
+├── MovieStreamerApplication.kt  # Application class with Koin initialization
+├── data/                        # Data layer
+│   ├── AuthInterceptor.kt      # TMDB API authentication interceptor
+│   ├── Movie.kt                # Movie data model
+│   ├── TmdbApi.kt              # TMDB REST interface
+│   ├── PublicDomainMovies.kt   # Hard-coded public domain content
+│   └── repository/             # Repository pattern implementations
+│       ├── MovieRepository.kt
+│       └── MovieRepositoryImpl.kt
+├── di/                          # Dependency injection modules
+│   ├── NetworkModule.kt        # Retrofit, OkHttp, API setup
+│   ├── RepositoryModule.kt     # Repository dependencies
+│   ├── UseCaseModule.kt        # Use case dependencies
+│   └── ViewModelModule.kt      # ViewModel dependencies
+├── domain/                      # Domain layer (business logic)
+│   └── usecase/                # Use cases for business operations
+│       ├── GetPopularMoviesUseCase.kt
+│       ├── GetTopRatedMoviesUseCase.kt
+│       ├── GetPublicDomainMoviesUseCase.kt
+│       └── SearchMoviesUseCase.kt
 ├── player/
-│   └── PlayerActivity.kt  # ExoPlayer video playback screen
-└── ui/
-    ├── MainActivity.kt
-    ├── HomeScreen.kt   # Main Compose screen
-    ├── HomeViewModel.kt
-    └── MovieCard.kt    # Reusable movie card composable
+│   └── PlayerActivity.kt       # ExoPlayer video playback with seek bar & back button
+└── ui/                          # UI layer
+    ├── MainActivity.kt         # Main entry point
+    ├── HomeScreen.kt           # Main Compose screen
+    ├── HomeViewModel.kt        # Home screen ViewModel
+    └── MovieCard.kt            # Reusable movie card composable
 ```
 
 ## Code Style & Conventions
@@ -42,6 +58,30 @@ app/src/main/java/com/moviestreamer/
 - All UI components are written as `@Composable` functions using Jetpack Compose for TV.
 - Use `remember` and `mutableStateOf` for local UI state inside composables.
 - ViewModels expose state via `StateFlow` and accept user intents as plain function calls.
+
+## Architecture Patterns
+
+The app follows **Clean Architecture** principles with clear separation of concerns:
+
+- **Presentation Layer** (`ui/`): Jetpack Compose screens and ViewModels
+- **Domain Layer** (`domain/`): Business logic in use cases (e.g., `GetPopularMoviesUseCase`)
+- **Data Layer** (`data/`): Repositories, API interfaces, and data models
+- **Dependency Injection** (`di/`): Koin modules for dependency management
+
+### Dependency Injection with Koin
+
+- Use Koin for dependency injection (not Hilt or Dagger)
+- Define dependencies in module files: `NetworkModule.kt`, `RepositoryModule.kt`, `UseCaseModule.kt`, `ViewModelModule.kt`
+- Initialize Koin in `MovieStreamerApplication.onCreate()`
+- Inject ViewModels using `by viewModel()` in Activities
+- Use constructor injection for repositories and use cases
+
+### Use Cases
+
+- Each use case represents a single business operation
+- Use cases are injected into ViewModels
+- Keep use cases focused and testable
+- Use `Result` or sealed classes for error handling
 
 ## Android TV / 10-Foot UI Guidelines
 
@@ -67,6 +107,24 @@ app/src/main/java/com/moviestreamer/
 - TMDB API key is read from `local.properties` (`tmdb.api.key=YOUR_KEY`). The app functions without it by showing only public domain content.
 - Do **not** commit secrets or API keys to source control.
 
+## Video Player Features
+
+The `PlayerActivity` provides a TV-optimized video playback experience:
+
+- **ExoPlayer Integration**: Uses Media3 ExoPlayer for robust video playback
+- **Seek Bar**: Built-in progress bar showing current position and duration
+- **TV Controls**: Controller visible by default (10 second timeout), optimized for D-pad navigation
+- **Back Navigation**: 
+  - Visible back button in top-left corner
+  - D-pad Left key returns to home
+  - Physical Back button support
+- **Playback Controls**:
+  - Play/Pause (Center/Enter key)
+  - Fast Forward (Right arrow or FF button)
+  - Rewind (Left arrow or Rewind button)
+- **Lifecycle Management**: Proper player release on activity stop/destroy
+- **Error Handling**: Displays error messages for playback failures
+
 ## Content & Legal Guidelines
 
 - Only add streaming content from legal sources (public domain films from Archive.org or similarly licensed sources).
@@ -77,5 +135,8 @@ app/src/main/java/com/moviestreamer/
 
 - Ensure all new UI maintains the 10-foot design principles and D-pad navigation works correctly.
 - Write unit tests for ViewModel logic and data layer changes.
+- Follow Clean Architecture principles: separate presentation, domain, and data concerns.
+- Add new use cases in `domain/usecase/` for business logic.
+- Define dependencies in appropriate Koin modules in `di/`.
 - Keep `PublicDomainMovies.kt` as the single source of truth for hard-coded content.
-- Follow existing naming conventions: `*Screen.kt` for full screens, `*Card.kt` for card components, `*ViewModel.kt` for ViewModels.
+- Follow existing naming conventions: `*Screen.kt` for full screens, `*Card.kt` for card components, `*ViewModel.kt` for ViewModels, `*UseCase.kt` for use cases.
