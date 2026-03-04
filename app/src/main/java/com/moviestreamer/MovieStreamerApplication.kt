@@ -1,6 +1,7 @@
 package com.moviestreamer
 
 import android.app.Application
+import com.moviestreamer.di.securityModule
 import com.moviestreamer.di.databaseModule
 import com.moviestreamer.di.networkModule
 import com.moviestreamer.di.repositoryModule
@@ -16,7 +17,7 @@ class MovieStreamerApplication : Application() {
         startKoin {
             androidLogger()
             androidContext(this@MovieStreamerApplication)
-            modules(networkModule, databaseModule, repositoryModule, useCaseModule, viewModelModule)
+            modules(networkModule, databaseModule, securityModule, repositoryModule, useCaseModule, viewModelModule)
         }
     }
 }

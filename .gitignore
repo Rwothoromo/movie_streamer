@@ -40,3 +40,7 @@ gradlew
 gradlew.bat
 
 .vscode/
+
+# macOS metadata
+.DS_Store
+**/.DS_Store
