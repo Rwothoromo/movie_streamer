@@ -11,7 +11,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.Modifier
 import com.moviestreamer.BuildConfig
 import com.moviestreamer.player.PlayerActivity
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     // HomeViewModel currently has no constructor dependencies, so we use the default factory.
     // If HomeViewModel starts accepting parameters, introduce a ViewModelProvider.Factory or DI.
