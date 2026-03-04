@@ -10,7 +10,12 @@ val viewModelModule = module {
             getPopularMoviesUseCase = get(),
             getTopRatedMoviesUseCase = get(),
             getPublicDomainMoviesUseCase = get(),
-            searchMoviesUseCase = get()
+            searchMoviesUseCase = get(),
+            getPopularTvShowsUseCase = get(),
+            getTopRatedTvShowsUseCase = get(),
+            getAiringTodayTvShowsUseCase = get(),
+            getTvShowDetailsUseCase = get(),
+            getTvSeasonDetailsUseCase = get()
         )
     }
 }
