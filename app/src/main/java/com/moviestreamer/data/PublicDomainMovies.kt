@@ -58,7 +58,9 @@ object PublicDomainMovies {
             releaseDate = null,
             voteAverage = null,
             voteCount = null,
-            videoUrl = src.streamUrl
+            // IPTV_FREE streams are currently unverified (404s, redirects).
+            // Set videoUrl=null until reliable channels are confirmed working.
+            videoUrl = src.streamUrl.takeIf { src.group == "VERIFIED" }
         )
     }
 }
