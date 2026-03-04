@@ -45,6 +45,7 @@ class PlayerActivity : AppCompatActivity() {
     private var tracksOverlay: LinearLayout? = null
     private var nextEpisodeOverlay: LinearLayout? = null
     private var nextEpisodeCountdownView: TextView? = null
+    private var bufferingSpinner: ProgressBar? = null
 
     private var videoUrl: String? = null
     private var movieTitle: String? = null
@@ -269,6 +270,19 @@ class PlayerActivity : AppCompatActivity() {
         nextEpisodeOverlay!!.addView(cancelNextBtn)
         root.addView(nextEpisodeOverlay)
 
+        // Buffering spinner
+        bufferingSpinner = ProgressBar(this, null, android.R.attr.progressBarStyleLarge).apply {
+            layoutParams = FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            ).apply { gravity = Gravity.CENTER }
+            visibility = View.GONE
+            indeterminateTintList = android.content.res.ColorStateList.valueOf(
+                android.graphics.Color.WHITE
+            )
+        }
+        root.addView(bufferingSpinner)
+
         setContentView(root)
     }
 
@@ -289,6 +303,8 @@ class PlayerActivity : AppCompatActivity() {
 
                 exoPlayer.addListener(object : Player.Listener {
                     override fun onPlaybackStateChanged(state: Int) {
+                        val isBuffering = state == Player.STATE_BUFFERING
+                        bufferingSpinner?.visibility = if (isBuffering) View.VISIBLE else View.GONE
                         when (state) {
                             Player.STATE_READY -> {
                                 hideError()
