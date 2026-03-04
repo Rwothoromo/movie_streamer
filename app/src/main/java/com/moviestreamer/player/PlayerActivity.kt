@@ -305,7 +305,11 @@ class PlayerActivity : AppCompatActivity() {
                     }
 
                     override fun onPlayerError(error: PlaybackException) {
-                        showError(getString(R.string.video_error))
+                        android.util.Log.e("PlayerActivity",
+                            "Playback error for url=$videoUrl | " +
+                            "errorCode=${error.errorCode} | cause=${error.cause?.message}", error)
+                        val detail = error.cause?.message ?: error.message ?: "unknown"
+                        showError("${getString(R.string.video_error)}\n$detail")
                     }
 
                     override fun onEvents(player: Player, events: Player.Events) {
