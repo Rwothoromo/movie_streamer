@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Movie Streamer</string>
+    <string name="browse_title">Parcourir les films</string>
+    <string name="popular_movies">Films populaires</string>
+    <string name="top_rated_movies">Films les mieux notés</string>
+    <string name="public_domain_movies">Classiques du domaine public</string>
+    <string name="play">Lire</string>
+    <string name="error_loading">Erreur lors du chargement</string>
+    <string name="no_description">Pas de description disponible</string>
+    <string name="search_hint">Rechercher des films…</string>
+    <string name="search_results">Résultats de recherche</string>
+    <string name="no_search_results">Aucun film trouvé</string>
+    <string name="video_error">Échec de la lecture vidéo</string>
+    <string name="popular_tv_shows">Séries populaires</string>
+    <string name="top_rated_tv_shows">Séries les mieux notées</string>
+    <string name="airing_today">Diffusé aujourd\'hui</string>
+    <string name="tv_detail_back">Retour</string>
+    <string name="seasons">Saisons</string>
+    <string name="season_number">Saison %d</string>
+    <string name="episode_number">Épisode %d</string>
+    <string name="continue_watching">Continuer à regarder</string>
+    <string name="skip_intro">Passer l\'intro</string>
+    <string name="retry">Réessayer</string>
+    <string name="play_next_episode">Lire l\'épisode suivant</string>
+    <string name="cancel">Annuler</string>
+    <string name="next_episode_countdown">Prochain épisode dans %d…</string>
+    <string name="classic_tv_episodes">Épisodes classiques</string>
+    <string name="free_live_channels">Chaînes en direct gratuites</string>
+    <string name="browse_by_genre">Parcourir par genre</string>
+    <string name="search_title">Rechercher</string>
+    <string name="search_movies_and_tv">Rechercher films et séries…</string>
+    <string name="favorites">Favoris</string>
+    <string name="favorite_movies">Films favoris</string>
+    <string name="favorite_tv_shows">Séries favorites</string>
+    <string name="loading">Chargement…</string>
+    <string name="back">Retour</string>
+    <string name="movie_poster_desc">Affiche de %s</string>
+    <string name="movie_rating_desc">Note : %.1f sur 10</string>
+    <string name="play_movie_desc">Lire %s</string>
+    <string name="tv_show_poster_desc">Affiche de %s</string>
+</resources>

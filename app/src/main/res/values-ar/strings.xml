@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- RTL layout is automatically applied by Android when locale is Arabic -->
+<resources>
+    <string name="app_name">Movie Streamer</string>
+    <string name="browse_title">تصفح الأفلام</string>
+    <string name="popular_movies">الأفلام الشائعة</string>
+    <string name="top_rated_movies">الأعلى تقييماً</string>
+    <string name="public_domain_movies">كلاسيكيات الملكية العامة</string>
+    <string name="play">تشغيل</string>
+    <string name="error_loading">خطأ في تحميل المحتوى</string>
+    <string name="no_description">لا يوجد وصف</string>
+    <string name="search_hint">البحث في الأفلام…</string>
+    <string name="search_results">نتائج البحث</string>
+    <string name="no_search_results">لم يُعثر على أفلام</string>
+    <string name="video_error">فشل تشغيل الفيديو</string>
+    <string name="popular_tv_shows">المسلسلات الشائعة</string>
+    <string name="top_rated_tv_shows">المسلسلات الأعلى تقييماً</string>
+    <string name="airing_today">يُعرض اليوم</string>
+    <string name="tv_detail_back">رجوع</string>
+    <string name="seasons">المواسم</string>
+    <string name="season_number">الموسم %d</string>
+    <string name="episode_number">الحلقة %d</string>
+    <string name="continue_watching">متابعة المشاهدة</string>
+    <string name="skip_intro">تخطي المقدمة</string>
+    <string name="retry">إعادة المحاولة</string>
+    <string name="play_next_episode">تشغيل الحلقة التالية</string>
+    <string name="cancel">إلغاء</string>
+    <string name="next_episode_countdown">الحلقة التالية خلال %d…</string>
+    <string name="classic_tv_episodes">حلقات كلاسيكية</string>
+    <string name="free_live_channels">قنوات مباشرة مجانية</string>
+    <string name="browse_by_genre">تصفح حسب النوع</string>
+    <string name="search_title">بحث</string>
+    <string name="search_movies_and_tv">البحث في الأفلام والمسلسلات…</string>
+    <string name="favorites">المفضلة</string>
+    <string name="favorite_movies">الأفلام المفضلة</string>
+    <string name="favorite_tv_shows">المسلسلات المفضلة</string>
+    <string name="loading">جارٍ التحميل…</string>
+    <string name="back">رجوع</string>
+    <string name="movie_poster_desc">ملصق %s</string>
+    <string name="movie_rating_desc">التقييم: %.1f من 10</string>
+    <string name="play_movie_desc">تشغيل %s</string>
+    <string name="tv_show_poster_desc">ملصق %s</string>
+</resources>

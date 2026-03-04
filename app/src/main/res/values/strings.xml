@@ -38,4 +38,19 @@
     <string name="next_episode_countdown">Next episode in %d…</string>
     <string name="classic_tv_episodes">Classic TV Episodes</string>
     <string name="free_live_channels">Free Live Channels</string>
+    <string name="browse_by_genre">Browse by Genre</string>
+    <string name="search_title">Search</string>
+    <string name="search_movies_and_tv">Search movies and TV shows…</string>
+    <string name="pin_label">PIN</string>
+    <string name="confirm_pin_label">Confirm PIN</string>
+    <string name="favorites">Favorites</string>
+    <string name="favorite_movies">Favorite Movies</string>
+    <string name="favorite_tv_shows">Favorite TV Shows</string>
+    <string name="genres">Genres</string>
+    <string name="loading">Loading…</string>
+    <string name="back">Back</string>
+    <string name="movie_poster_desc">%s poster</string>
+    <string name="movie_rating_desc">Rating: %.1f out of 10</string>
+    <string name="play_movie_desc">Play %s</string>
+    <string name="tv_show_poster_desc">%s poster</string>
 </resources>
