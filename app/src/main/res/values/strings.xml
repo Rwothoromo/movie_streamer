@@ -29,4 +29,11 @@
     <string name="vote_average_format">★ %.1f</string>
     <string name="show_more">Show more</string>
     <string name="show_less">Show less</string>
+    <string name="skip_intro">Skip Intro</string>
+    <string name="speed_normal">1x</string>
+    <string name="tracks_button">CC/Audio</string>
+    <string name="retry">Retry</string>
+    <string name="play_next_episode">Play Next Episode</string>
+    <string name="cancel">Cancel</string>
+    <string name="next_episode_countdown">Next episode in %d…</string>
 </resources>
