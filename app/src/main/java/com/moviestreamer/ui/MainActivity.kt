@@ -61,7 +61,7 @@ class MainActivity : ComponentActivity() {
                                 }
                                 startActivity(intent)
                             } else {
-                                Toast.makeText(this, "This movie is for browsing only (no playback available)", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(this, "Streaming not available for this title", Toast.LENGTH_SHORT).show()
                                 Log.i(TAG, "Movie '${movie.title}' has no playback URL (TMDB movies are metadata-only)")
                             }
                         },
@@ -84,7 +84,7 @@ class MainActivity : ComponentActivity() {
                                 }
                                 startActivity(intent)
                             } else {
-                                Toast.makeText(this, "This movie is for browsing only (no playback available)", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(this, "Streaming not available for this title", Toast.LENGTH_SHORT).show()
                             }
                         },
                         onTvShowClick = { tvShow -> currentScreen = Screen.TvDetail(tvShow) },
@@ -103,7 +103,7 @@ class MainActivity : ComponentActivity() {
                                 }
                                 startActivity(intent)
                             } else {
-                                Toast.makeText(this, "This movie is for browsing only (no playback available)", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(this, "Streaming not available for this title", Toast.LENGTH_SHORT).show()
                             }
                         },
                         onTvShowClick = { tvShow -> currentScreen = Screen.TvDetail(tvShow) },

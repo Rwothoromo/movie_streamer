@@ -2,6 +2,7 @@ package com.moviestreamer.data
 
 import com.moviestreamer.data.streaming.StreamingCatalog
 import com.moviestreamer.data.streaming.StreamingSource
+import com.moviestreamer.data.streaming.StreamingProvider
 
 object PublicDomainMovies {
     /**
@@ -18,7 +19,10 @@ object PublicDomainMovies {
             releaseDate = null,
             voteAverage = null,
             voteCount = null,
-            videoUrl = src.url
+            // Archive.org URLs are unreliable (redirects, rate-limits). Only set
+            // videoUrl for verified reliable providers so the UI shows "browsing only"
+            // instead of launching the player and immediately failing.
+            videoUrl = src.url.takeIf { src.provider != StreamingProvider.ARCHIVE_ORG }
         )
     }
 
@@ -36,7 +40,7 @@ object PublicDomainMovies {
             releaseDate = null,
             voteAverage = null,
             voteCount = null,
-            videoUrl = src.url
+            videoUrl = src.url.takeIf { src.provider != StreamingProvider.ARCHIVE_ORG }
         )
     }
 
