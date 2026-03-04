@@ -6,8 +6,7 @@ import retrofit2.http.Query
 
 interface TmdbApi {
 
-    // ─── Movies ───────────────────────────────────────────────────────────────
-
+    // Movies
     @GET("movie/popular")
     suspend fun getPopularMovies(@Query("page") page: Int = 1): MoviesResponse
 
@@ -29,8 +28,7 @@ interface TmdbApi {
         @Query("page") page: Int = 1
     ): MoviesResponse
 
-    // ─── TV Shows ─────────────────────────────────────────────────────────────
-
+    // TV Shows - Listings
     @GET("tv/popular")
     suspend fun getTvPopular(@Query("page") page: Int = 1): TvShowsResponse
 
@@ -43,6 +41,7 @@ interface TmdbApi {
     @GET("tv/on_the_air")
     suspend fun getTvOnTheAir(@Query("page") page: Int = 1): TvShowsResponse
 
+    // TV Shows - Details
     @GET("tv/{tv_id}")
     suspend fun getTvShowDetails(@Path("tv_id") tvId: Int): TvShow
 
@@ -71,8 +70,7 @@ interface TmdbApi {
         @Query("page") page: Int = 1
     ): TvShowsResponse
 
-    // ─── Search ───────────────────────────────────────────────────────────────
-
+    // Search
     @GET("search/movie")
     suspend fun searchMovies(
         @Query("query") query: String,
