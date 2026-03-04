@@ -34,10 +34,10 @@ google-services.json
 # Android Profiling
 *.hprof
 
-# Gradle wrapper
-gradle/
-gradlew
-gradlew.bat
+# Gradle wrapper (keep the jar and scripts so CI can run Gradle)
+gradle/wrapper/.gradle
+!gradle/wrapper/gradle-wrapper.jar
+!gradle/wrapper/gradle-wrapper.properties
 
 .vscode/
 
