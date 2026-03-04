@@ -59,6 +59,22 @@ buildConfigField("String", "TMDB_API_KEY", "\"your_actual_api_key\"")
 
 ### 4. Install and Run
 
+**Start the TV emulator (if not already running):**
+
+```bash
+# List available AVDs
+emulator -list-avds
+
+# Launch the TV emulator (replace TV_Emulator_34 with your AVD name)
+emulator -avd TV_Emulator_34 &
+```
+
+Wait for the emulator to fully boot, then verify it is detected:
+
+```bash
+adb devices
+```
+
 **One-command build, install, and launch:**
 
 ```bash
@@ -73,6 +89,19 @@ buildConfigField("String", "TMDB_API_KEY", "\"your_actual_api_key\"")
 
 # Launch the app
 adb shell am start -n com.moviestreamer/.ui.MainActivity
+```
+
+**View app logs (Logcat):**
+
+```bash
+# Stream all logs for this app
+adb logcat --pid=$(adb shell pidof com.moviestreamer) -v time
+
+# Or filter by package name (works even before the process starts)
+adb logcat | grep com.moviestreamer
+
+# Filter by tag (e.g. MainActivity, HomeViewModel)
+adb logcat -s MainActivity HomeViewModel PlayerActivity
 ```
 
 Alternatively, use Android Studio to build and deploy directly.
