@@ -38,3 +38,5 @@ google-services.json
 gradle/
 gradlew
 gradlew.bat
+
+.vscode/

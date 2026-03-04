@@ -47,8 +47,11 @@ class PlayerActivity : Activity() {
                 ViewGroup.LayoutParams.MATCH_PARENT
             )
             useController = true
-            controllerShowTimeoutMs = 5000
-            controllerHideOnTouch = true
+            controllerShowTimeoutMs = 10000  // Show controller for 10 seconds
+            controllerHideOnTouch = false    // Keep controller visible (important for TV)
+            
+            // Configure for TV viewing
+            setShutterBackgroundColor(android.graphics.Color.BLACK)
         }
 
         // Create error text view

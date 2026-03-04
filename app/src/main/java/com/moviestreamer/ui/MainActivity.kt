@@ -12,7 +12,6 @@ import com.moviestreamer.BuildConfig
 import com.moviestreamer.player.PlayerActivity
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
-@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     private val viewModel: HomeViewModel by viewModel()
     
