@@ -6,16 +6,14 @@ import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.viewModels
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.Modifier
 import com.moviestreamer.BuildConfig
 import com.moviestreamer.player.PlayerActivity
+import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class MainActivity : ComponentActivity() {
-    // HomeViewModel currently has no constructor dependencies, so we use the default factory.
-    // If HomeViewModel starts accepting parameters, introduce a ViewModelProvider.Factory or DI.
-    private val viewModel: HomeViewModel by viewModels()
+    private val viewModel: HomeViewModel by viewModel()
     
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

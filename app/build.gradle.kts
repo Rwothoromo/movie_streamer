@@ -99,7 +99,12 @@ dependencies {
     
     // Coroutines
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
-    
+
+    // Koin for Android
+    implementation("io.insert-koin:koin-android:3.5.3")
+    implementation("io.insert-koin:koin-androidx-compose:3.5.3")
+    implementation("io.insert-koin:koin-androidx-viewmodel:3.5.3")
+
     // Debug
     debugImplementation("androidx.compose.ui:ui-tooling")
 }

@@ -1,12 +1,12 @@
 package com.moviestreamer.ui
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.moviestreamer.BuildConfig
-import com.moviestreamer.data.ApiClient
 import com.moviestreamer.data.Movie
-import com.moviestreamer.data.PublicDomainMovies
+import com.moviestreamer.domain.usecase.GetPopularMoviesUseCase
+import com.moviestreamer.domain.usecase.GetPublicDomainMoviesUseCase
+import com.moviestreamer.domain.usecase.GetTopRatedMoviesUseCase
+import com.moviestreamer.domain.usecase.SearchMoviesUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -22,89 +22,49 @@ data class HomeUiState(
     val error: String? = null
 )
 
-class HomeViewModel : ViewModel() {
+class HomeViewModel(
+    private val getPopularMoviesUseCase: GetPopularMoviesUseCase,
+    private val getTopRatedMoviesUseCase: GetTopRatedMoviesUseCase,
+    private val getPublicDomainMoviesUseCase: GetPublicDomainMoviesUseCase,
+    private val searchMoviesUseCase: SearchMoviesUseCase
+) : ViewModel() {
     private val _uiState = MutableStateFlow(HomeUiState())
     val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
-    
+
     private var allMovies: List<Movie> = emptyList()
-    
+
     init {
         loadMovies()
     }
-    
+
     private fun loadMovies() {
         viewModelScope.launch {
             try {
                 _uiState.value = _uiState.value.copy(isLoading = true, error = null)
-                
-                // Load public domain movies (always available)
-                val publicDomain = PublicDomainMovies.publicDomainMovies
-                
-                // Try to load TMDB data if API key is configured
-                var popular = emptyList<Movie>()
-                var topRated = emptyList<Movie>()
-                
-                val apiKey = BuildConfig.TMDB_API_KEY
-                // Check if API key is valid (not a placeholder pattern)
-                val placeholderPatterns = listOf("YOUR_", "REPLACE", "PLACEHOLDER", "EXAMPLE")
-                val isValidKey = apiKey.isNotBlank() && 
-                    placeholderPatterns.none { apiKey.trim().uppercase().startsWith(it) }
-                
-                if (isValidKey) {
-                    try {
-                        popular = ApiClient.tmdbApi.getPopularMovies(
-                            apiKey = apiKey,
-                            page = 1
-                        ).results
-                        
-                        topRated = ApiClient.tmdbApi.getTopRatedMovies(
-                            apiKey = apiKey,
-                            page = 1
-                        ).results
-                    } catch (e: Exception) {
-                        // If TMDB fails, we still have public domain content
-                        Log.e("HomeViewModel", "Failed to load TMDB data", e)
-                    }
-                }
-                
+                val publicDomain = getPublicDomainMoviesUseCase()
+                val popular = getPopularMoviesUseCase().getOrDefault(emptyList())
+                val topRated = getTopRatedMoviesUseCase().getOrDefault(emptyList())
                 _uiState.value = HomeUiState(
                     popularMovies = popular,
                     topRatedMovies = topRated,
                     publicDomainMovies = publicDomain,
                     isLoading = false
                 )
-                
-                // Store all movies for search functionality
                 allMovies = popular + topRated + publicDomain
             } catch (e: Exception) {
-                _uiState.value = _uiState.value.copy(
-                    isLoading = false,
-                    error = e.message
-                )
+                _uiState.value = _uiState.value.copy(isLoading = false, error = e.message)
             }
         }
     }
-    
+
     fun retry() {
         loadMovies()
     }
-    
+
     fun updateSearchQuery(query: String) {
         _uiState.value = _uiState.value.copy(searchQuery = query)
-        performSearch(query)
-    }
-    
-    private fun performSearch(query: String) {
-        if (query.isBlank()) {
-            _uiState.value = _uiState.value.copy(searchResults = emptyList())
-            return
-        }
-        
-        val filteredMovies = allMovies.filter { movie ->
-            movie.title.contains(query, ignoreCase = true) ||
-            movie.overview?.contains(query, ignoreCase = true) == true
-        }
-        
-        _uiState.value = _uiState.value.copy(searchResults = filteredMovies)
+        _uiState.value = _uiState.value.copy(
+            searchResults = searchMoviesUseCase(query, allMovies)
+        )
     }
 }
