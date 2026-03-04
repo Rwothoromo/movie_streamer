@@ -70,6 +70,14 @@ class MainActivity : ComponentActivity() {
                         },
                         onSearchClick = { currentScreen = Screen.Search },
                         onGenreClick = { currentScreen = Screen.Genre },
+                        onContinueWatchingClick = { item ->
+                            val intent = Intent(this, PlayerActivity::class.java).apply {
+                                putExtra(PlayerActivity.EXTRA_VIDEO_URL, item.videoUrl)
+                                putExtra(PlayerActivity.EXTRA_MOVIE_TITLE, item.title)
+                                putExtra(PlayerActivity.EXTRA_CONTENT_ID, item.contentId)
+                            }
+                            startActivity(intent)
+                        },
                         modifier = Modifier.fillMaxSize()
                     )
                 }

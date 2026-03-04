@@ -27,6 +27,7 @@ fun HomeScreen(
     onTvShowClick: (TvShow) -> Unit,
     onSearchClick: () -> Unit,
     onGenreClick: () -> Unit,
+    onContinueWatchingClick: (ContinueWatchingEntity) -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -87,7 +88,7 @@ fun HomeScreen(
                         item {
                             ContinueWatchingRow(
                                 items = uiState.continueWatching,
-                                onItemClick = { /* play */ }
+                                onItemClick = onContinueWatchingClick
                             )
                         }
                     }
