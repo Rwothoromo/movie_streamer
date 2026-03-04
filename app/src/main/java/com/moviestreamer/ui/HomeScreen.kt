@@ -3,6 +3,8 @@ package com.moviestreamer.ui
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -16,12 +18,15 @@ import androidx.compose.ui.unit.sp
 import com.moviestreamer.R
 import com.moviestreamer.data.Movie
 import com.moviestreamer.data.TvShow
+import com.moviestreamer.data.local.ContinueWatchingEntity
 
 @Composable
 fun HomeScreen(
     viewModel: HomeViewModel,
     onMovieClick: (Movie) -> Unit,
     onTvShowClick: (TvShow) -> Unit,
+    onSearchClick: () -> Unit,
+    onGenreClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -63,102 +68,115 @@ fun HomeScreen(
                             fontSize = 48.sp
                         )
                     }
-                    
-                    // Search Bar
+
+                    // Navigation buttons
                     item {
-                        SearchBar(
-                            query = uiState.searchQuery,
-                            onQueryChange = { viewModel.updateSearchQuery(it) },
-                            modifier = Modifier.padding(horizontal = 48.dp, vertical = 8.dp)
-                        )
+                        Row(modifier = Modifier.padding(horizontal = 48.dp, vertical = 8.dp)) {
+                            TextButton(onClick = onSearchClick) {
+                                Text("🔍 Search", color = Color.White, fontSize = 18.sp)
+                            }
+                            Spacer(modifier = Modifier.width(16.dp))
+                            TextButton(onClick = onGenreClick) {
+                                Text("🎭 Browse Genres", color = Color.White, fontSize = 18.sp)
+                            }
+                        }
+                    }
+
+                    // Continue Watching
+                    if (uiState.continueWatching.isNotEmpty()) {
+                        item {
+                            ContinueWatchingRow(
+                                items = uiState.continueWatching,
+                                onItemClick = { /* play */ }
+                            )
+                        }
+                    }
+
+                    // My Favorites - Movies
+                    if (uiState.favoriteMovies.isNotEmpty()) {
+                        item {
+                            MovieRow(
+                                title = "My Favorites",
+                                movies = uiState.favoriteMovies,
+                                onMovieClick = onMovieClick
+                            )
+                        }
+                    }
+
+                    // My Favorites - TV Shows
+                    if (uiState.favoriteTvShows.isNotEmpty()) {
+                        item {
+                            TvShowRow(
+                                title = "Favorite Shows",
+                                tvShows = uiState.favoriteTvShows,
+                                onTvShowClick = onTvShowClick
+                            )
+                        }
+                    }
+
+                    // Public Domain Movies (always available)
+                    if (uiState.publicDomainMovies.isNotEmpty()) {
+                        item {
+                            MovieRow(
+                                title = stringResource(R.string.public_domain_movies),
+                                movies = uiState.publicDomainMovies,
+                                onMovieClick = onMovieClick
+                            )
+                        }
                     }
                     
-                    // Show search results if there's a search query
-                    if (uiState.searchQuery.isNotBlank()) {
-                        if (uiState.searchResults.isNotEmpty()) {
-                            item {
-                                MovieRow(
-                                    title = stringResource(R.string.search_results),
-                                    movies = uiState.searchResults,
-                                    onMovieClick = onMovieClick
-                                )
-                            }
-                        } else {
-                            item {
-                                Text(
-                                    text = stringResource(R.string.no_search_results),
-                                    modifier = Modifier.padding(start = 48.dp, top = 16.dp),
-                                    color = Color.Gray,
-                                    fontSize = 18.sp
-                                )
-                            }
+                    // Popular Movies (from TMDB)
+                    if (uiState.popularMovies.isNotEmpty()) {
+                        item {
+                            MovieRow(
+                                title = stringResource(R.string.popular_movies),
+                                movies = uiState.popularMovies,
+                                onMovieClick = onMovieClick
+                            )
                         }
-                    } else {
-                        // Normal browse view
-                        // Public Domain Movies (always available)
-                        if (uiState.publicDomainMovies.isNotEmpty()) {
-                            item {
-                                MovieRow(
-                                    title = stringResource(R.string.public_domain_movies),
-                                    movies = uiState.publicDomainMovies,
-                                    onMovieClick = onMovieClick
-                                )
-                            }
+                    }
+                    
+                    // Top Rated Movies (from TMDB)
+                    if (uiState.topRatedMovies.isNotEmpty()) {
+                        item {
+                            MovieRow(
+                                title = stringResource(R.string.top_rated_movies),
+                                movies = uiState.topRatedMovies,
+                                onMovieClick = onMovieClick
+                            )
                         }
-                        
-                        // Popular Movies (from TMDB)
-                        if (uiState.popularMovies.isNotEmpty()) {
-                            item {
-                                MovieRow(
-                                    title = stringResource(R.string.popular_movies),
-                                    movies = uiState.popularMovies,
-                                    onMovieClick = onMovieClick
-                                )
-                            }
-                        }
-                        
-                        // Top Rated Movies (from TMDB)
-                        if (uiState.topRatedMovies.isNotEmpty()) {
-                            item {
-                                MovieRow(
-                                    title = stringResource(R.string.top_rated_movies),
-                                    movies = uiState.topRatedMovies,
-                                    onMovieClick = onMovieClick
-                                )
-                            }
-                        }
+                    }
 
-                        // Popular TV Shows
-                        if (uiState.popularTvShows.isNotEmpty()) {
-                            item {
-                                TvShowRow(
-                                    title = stringResource(R.string.popular_tv_shows),
-                                    tvShows = uiState.popularTvShows,
-                                    onTvShowClick = onTvShowClick
-                                )
-                            }
+                    // Popular TV Shows
+                    if (uiState.popularTvShows.isNotEmpty()) {
+                        item {
+                            TvShowRow(
+                                title = stringResource(R.string.popular_tv_shows),
+                                tvShows = uiState.popularTvShows,
+                                onTvShowClick = onTvShowClick
+                            )
                         }
+                    }
 
-                        // Top Rated TV Shows
-                        if (uiState.topRatedTvShows.isNotEmpty()) {
-                            item {
-                                TvShowRow(
-                                    title = stringResource(R.string.top_rated_tv_shows),
-                                    tvShows = uiState.topRatedTvShows,
-                                    onTvShowClick = onTvShowClick
-                                )
-                            }
+                    // Top Rated TV Shows
+                    if (uiState.topRatedTvShows.isNotEmpty()) {
+                        item {
+                            TvShowRow(
+                                title = stringResource(R.string.top_rated_tv_shows),
+                                tvShows = uiState.topRatedTvShows,
+                                onTvShowClick = onTvShowClick
+                            )
                         }
+                    }
 
-                        // Airing Today TV Shows
-                        if (uiState.airingTodayTvShows.isNotEmpty()) {
-                            item {
-                                TvShowRow(
-                                    title = stringResource(R.string.airing_today),
-                                    tvShows = uiState.airingTodayTvShows,
-                                    onTvShowClick = onTvShowClick
-                                )
-                            }
+                    // Airing Today TV Shows
+                    if (uiState.airingTodayTvShows.isNotEmpty()) {
+                        item {
+                            TvShowRow(
+                                title = stringResource(R.string.airing_today),
+                                tvShows = uiState.airingTodayTvShows,
+                                onTvShowClick = onTvShowClick
+                            )
                         }
                     }
                 }
@@ -167,32 +185,64 @@ fun HomeScreen(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SearchBar(
-    query: String,
-    onQueryChange: (String) -> Unit,
+fun ContinueWatchingRow(
+    items: List<ContinueWatchingEntity>,
+    onItemClick: (ContinueWatchingEntity) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    OutlinedTextField(
-        value = query,
-        onValueChange = onQueryChange,
-        placeholder = {
-            Text(
-                text = stringResource(R.string.search_hint),
-                color = Color.Gray
-            )
-        },
-        modifier = modifier
-            .fillMaxWidth()
-            .height(56.dp),
-        colors = OutlinedTextFieldDefaults.colors(
-            focusedTextColor = Color.White,
-            unfocusedTextColor = Color.White,
-            focusedBorderColor = Color.White,
-            unfocusedBorderColor = Color.Gray,
-            cursorColor = Color.White
-        ),
-        singleLine = true
-    )
+    Column(modifier = modifier.padding(vertical = 8.dp)) {
+        Text(
+            text = "Continue Watching",
+            modifier = Modifier.padding(start = 48.dp, bottom = 8.dp),
+            color = Color.White,
+            fontSize = 24.sp
+        )
+        LazyRow(
+            contentPadding = PaddingValues(horizontal = 48.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            items(items) { item ->
+                ContinueWatchingCard(item = item, onClick = { onItemClick(item) })
+            }
+        }
+    }
 }
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun ContinueWatchingCard(
+    item: ContinueWatchingEntity,
+    onClick: () -> Unit
+) {
+    val progress = if (item.durationMs > 0) item.progressMs.toFloat() / item.durationMs else 0f
+    Card(
+        onClick = onClick,
+        modifier = Modifier
+            .width(160.dp)
+            .height(120.dp),
+        colors = CardDefaults.cardColors(containerColor = Color(0xFF1E1E1E))
+    ) {
+        Box(modifier = Modifier.fillMaxSize()) {
+            Text(
+                text = item.title,
+                modifier = Modifier
+                    .align(Alignment.Center)
+                    .padding(8.dp),
+                color = Color.White,
+                fontSize = 14.sp,
+                maxLines = 2
+            )
+            LinearProgressIndicator(
+                progress = progress,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(4.dp)
+                    .align(Alignment.BottomCenter),
+                color = Color.Red,
+                trackColor = Color.DarkGray
+            )
+        }
+    }
+}
+

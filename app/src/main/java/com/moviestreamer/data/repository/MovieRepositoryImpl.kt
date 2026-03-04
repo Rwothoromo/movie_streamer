@@ -36,4 +36,20 @@ class MovieRepositoryImpl(private val tmdbApi: TmdbApi) : MovieRepository {
     override suspend fun getTvSeasonDetails(tvId: Int, seasonNumber: Int): Result<Season> = runCatching {
         tmdbApi.getSeasonDetails(tvId, seasonNumber)
     }
+
+    override suspend fun searchMovies(query: String): Result<List<Movie>> = runCatching {
+        tmdbApi.searchMovies(query).results
+    }
+
+    override suspend fun searchTvShows(query: String): Result<List<TvShow>> = runCatching {
+        tmdbApi.searchTvShows(query).results
+    }
+
+    override suspend fun getMoviesByGenre(genreId: Int): Result<List<Movie>> = runCatching {
+        tmdbApi.discoverMoviesByGenre(genreId).results
+    }
+
+    override suspend fun getTvShowsByGenre(genreId: Int): Result<List<TvShow>> = runCatching {
+        tmdbApi.discoverTvShowsByGenre(genreId).results
+    }
 }
