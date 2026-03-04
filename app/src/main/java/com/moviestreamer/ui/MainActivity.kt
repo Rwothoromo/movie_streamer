@@ -15,8 +15,6 @@ import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
-    // HomeViewModel currently has no constructor dependencies, so we use the default factory.
-    // If HomeViewModel starts accepting parameters, introduce a ViewModelProvider.Factory or DI.
     private val viewModel: HomeViewModel by viewModels()
     
     override fun onCreate(savedInstanceState: Bundle?) {

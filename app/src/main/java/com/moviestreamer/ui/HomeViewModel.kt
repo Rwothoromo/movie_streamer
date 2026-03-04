@@ -52,8 +52,14 @@ class HomeViewModel @Inject constructor(
                 var topRated = emptyList<Movie>()
 
                 try {
-                    popular = getPopularMovies().getOrDefault(emptyList())
-                    topRated = getTopRatedMovies().getOrDefault(emptyList())
+                    popular = getPopularMovies().getOrElse { e ->
+                        Log.e("HomeViewModel", "Failed to load popular movies", e)
+                        emptyList()
+                    }
+                    topRated = getTopRatedMovies().getOrElse { e ->
+                        Log.e("HomeViewModel", "Failed to load top rated movies", e)
+                        emptyList()
+                    }
                 } catch (e: Exception) {
                     Log.e("HomeViewModel", "Failed to load TMDB data", e)
                 }
