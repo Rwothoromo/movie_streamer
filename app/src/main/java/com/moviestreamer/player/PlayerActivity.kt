@@ -1,269 +1,567 @@
 package com.moviestreamer.player
 
+import android.app.PictureInPictureParams
+import android.content.res.Configuration
 import android.os.Build
 import android.os.Bundle
+import android.util.Rational
+import android.view.Gravity
 import android.view.KeyEvent
 import android.view.View
 import android.view.ViewGroup
-import android.view.WindowInsetsController
-import android.widget.FrameLayout
-import android.widget.ImageButton
-import android.widget.TextView
-import android.app.Activity
-import android.graphics.Color
+import android.widget.*
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
+import androidx.lifecycle.lifecycleScope
+import androidx.media3.common.C
 import androidx.media3.common.MediaItem
+import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
+import androidx.media3.common.TrackSelectionOverride
 import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.exoplayer.trackselection.DefaultTrackSelector
 import androidx.media3.ui.PlayerView
 import com.moviestreamer.R
+import com.moviestreamer.data.local.ContinueWatchingEntity
+import com.moviestreamer.data.repository.LocalRepository
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import org.koin.android.ext.android.inject
 
-class PlayerActivity : Activity() {
+class PlayerActivity : AppCompatActivity() {
+
     private var player: ExoPlayer? = null
+    private var trackSelector: DefaultTrackSelector? = null
     private var playerView: PlayerView? = null
+    private var errorLayout: LinearLayout? = null
     private var errorTextView: TextView? = null
+    private var skipIntroButton: Button? = null
+    private var speedButton: Button? = null
+    private var tracksButton: Button? = null
+    private var speedOverlay: LinearLayout? = null
+    private var tracksOverlay: LinearLayout? = null
+    private var nextEpisodeOverlay: LinearLayout? = null
+    private var nextEpisodeCountdownView: TextView? = null
+
     private var videoUrl: String? = null
     private var movieTitle: String? = null
+    private var contentId: String? = null
+    private var introEndMs: Long = -1L
+    private var nextEpisodeUrl: String? = null
+    private var nextEpisodeTitle: String? = null
+
     private var playWhenReady = true
     private var playbackPosition = 0L
+    private var saveProgressJob: Job? = null
+    private var nextEpisodeJob: Job? = null
+
+    private val localRepository: LocalRepository by inject()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // Get video URL from intent
-        videoUrl = intent.getStringExtra("VIDEO_URL")
-        movieTitle = intent.getStringExtra("MOVIE_TITLE")
+        videoUrl = intent.getStringExtra(EXTRA_VIDEO_URL)
+        movieTitle = intent.getStringExtra(EXTRA_MOVIE_TITLE)
+        contentId = intent.getStringExtra(EXTRA_CONTENT_ID)
+            ?: "content_${videoUrl?.hashCode() ?: 0}"
+        introEndMs = intent.getLongExtra(EXTRA_INTRO_END_MS, -1L)
+        nextEpisodeUrl = intent.getStringExtra(EXTRA_NEXT_EPISODE_URL)
+        nextEpisodeTitle = intent.getStringExtra(EXTRA_NEXT_EPISODE_TITLE)
 
-        // Validate video URL
         if (videoUrl.isNullOrBlank()) {
             finish()
             return
         }
 
-        // Create player view programmatically
+        buildUI()
+        hideSystemUI()
+
+        // Restore continue watching position, then init player
+        lifecycleScope.launch {
+            val saved = localRepository.getContinueWatchingItem(contentId!!)
+            playbackPosition = saved?.progressMs ?: 0L
+            initializePlayer()
+        }
+    }
+
+    private fun buildUI() {
+        val root = FrameLayout(this).apply {
+            setBackgroundColor(android.graphics.Color.BLACK)
+            layoutParams = ViewGroup.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT
+            )
+        }
+
+        // Player view
         playerView = PlayerView(this).apply {
             layoutParams = ViewGroup.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT
             )
             useController = true
-            controllerShowTimeoutMs = 10000  // Show controller for 10 seconds
-            controllerHideOnTouch = false    // Keep controller visible (important for TV)
-            
-            // Configure for TV viewing
+            controllerShowTimeoutMs = 5000
+            controllerHideOnTouch = false
             setShutterBackgroundColor(android.graphics.Color.BLACK)
         }
+        root.addView(playerView)
 
-        // Create error text view
-        errorTextView = TextView(this).apply {
+        // Error layout with retry button
+        errorLayout = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            gravity = Gravity.CENTER
             layoutParams = FrameLayout.LayoutParams(
-                FrameLayout.LayoutParams.WRAP_CONTENT,
-                FrameLayout.LayoutParams.WRAP_CONTENT
-            ).apply {
-                gravity = android.view.Gravity.CENTER
-            }
-            text = ""
-            textSize = 18f
-            setTextColor(android.graphics.Color.WHITE)
-            visibility = View.GONE
-        }
-
-        // Create back button for TV navigation
-        val backButton = ImageButton(this).apply {
-            layoutParams = FrameLayout.LayoutParams(
-                80,
-                80
-            ).apply {
-                gravity = android.view.Gravity.TOP or android.view.Gravity.START
-                setMargins(32, 32, 0, 0)
-            }
-            setImageResource(android.R.drawable.ic_menu_close_clear_cancel)
-            setBackgroundColor(Color.argb(200, 0, 0, 0))
-            contentDescription = "Back to home"
-            setOnClickListener {
-                releasePlayer()
-                finish()
-            }
-        }
-
-        val frameLayout = FrameLayout(this).apply {
-            layoutParams = ViewGroup.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT
             )
-            setBackgroundColor(android.graphics.Color.BLACK)
-            addView(playerView)
-            addView(errorTextView)
-            addView(backButton)
+            visibility = View.GONE
         }
+        errorTextView = TextView(this).apply {
+            textSize = 18f
+            setTextColor(android.graphics.Color.WHITE)
+            gravity = Gravity.CENTER
+            setPadding(32, 0, 32, 16)
+        }
+        val retryButton = Button(this).apply {
+            text = getString(R.string.retry)
+            setOnClickListener { hideError(); releasePlayer(); initializePlayer() }
+        }
+        errorLayout!!.addView(errorTextView)
+        errorLayout!!.addView(retryButton)
+        root.addView(errorLayout)
 
-        setContentView(frameLayout)
+        // Back button
+        val backButton = ImageButton(this).apply {
+            layoutParams = FrameLayout.LayoutParams(80, 80).apply {
+                gravity = Gravity.TOP or Gravity.START
+                setMargins(32, 32, 0, 0)
+            }
+            setImageResource(android.R.drawable.ic_menu_close_clear_cancel)
+            setBackgroundColor(android.graphics.Color.argb(180, 0, 0, 0))
+            contentDescription = getString(R.string.tv_detail_back)
+            setOnClickListener { releasePlayer(); finish() }
+        }
+        root.addView(backButton)
 
-        // Hide system UI for immersive fullscreen
-        hideSystemUI()
-
-        initializePlayer()
-    }
-
-    private fun hideSystemUI() {
-        WindowCompat.setDecorFitsSystemWindows(window, false)
-
-        // Use WindowInsetsControllerCompat for consistent behavior across API levels
-        val controller = WindowCompat.getInsetsController(window, window.decorView)
-        controller.apply {
-            hide(WindowInsetsCompat.Type.systemBars())
-            systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                window.insetsController?.let { controller ->
-                    controller.hide(
-                        android.view.WindowInsets.Type.statusBars() or
-                                android.view.WindowInsets.Type.navigationBars()
-                    )
-                    controller.systemBarsBehavior =
-                        WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
-                }
-            } else {
-                @Suppress("DEPRECATION")
-                window.decorView.systemUiVisibility = (
-                        View.SYSTEM_UI_FLAG_FULLSCREEN
-                                or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-                                or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
-                        )
+        // Skip Intro button
+        skipIntroButton = Button(this).apply {
+            text = getString(R.string.skip_intro)
+            layoutParams = FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            ).apply {
+                gravity = Gravity.BOTTOM or Gravity.END
+                setMargins(0, 0, 48, 160)
+            }
+            visibility = View.GONE
+            setOnClickListener {
+                player?.seekTo(introEndMs)
+                visibility = View.GONE
             }
         }
+        root.addView(skipIntroButton)
+
+        // Speed button
+        speedButton = Button(this).apply {
+            text = getString(R.string.speed_normal)
+            layoutParams = FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            ).apply {
+                gravity = Gravity.TOP or Gravity.END
+                setMargins(0, 32, 300, 0)
+            }
+            setOnClickListener { toggleSpeedOverlay() }
+        }
+        root.addView(speedButton)
+
+        // Tracks (CC/Audio) button
+        tracksButton = Button(this).apply {
+            text = getString(R.string.tracks_button)
+            layoutParams = FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            ).apply {
+                gravity = Gravity.TOP or Gravity.END
+                setMargins(0, 32, 32, 0)
+            }
+            visibility = View.GONE
+            setOnClickListener { toggleTracksOverlay() }
+        }
+        root.addView(tracksButton)
+
+        // Speed overlay
+        speedOverlay = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            setBackgroundColor(android.graphics.Color.argb(220, 20, 20, 20))
+            layoutParams = FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            ).apply {
+                gravity = Gravity.TOP or Gravity.END
+                setMargins(0, 120, 300, 0)
+            }
+            visibility = View.GONE
+            setPadding(8, 8, 8, 8)
+        }
+        listOf(0.5f to "0.5x", 0.75f to "0.75x", 1.0f to "1x",
+               1.25f to "1.25x", 1.5f to "1.5x", 2.0f to "2x").forEach { (speed, label) ->
+            Button(this).apply {
+                text = label
+                setOnClickListener {
+                    player?.setPlaybackSpeed(speed)
+                    speedButton?.text = label
+                    speedOverlay?.visibility = View.GONE
+                }
+            }.also { speedOverlay!!.addView(it) }
+        }
+        root.addView(speedOverlay)
+
+        // Tracks overlay (populated dynamically when tracks are known)
+        tracksOverlay = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            setBackgroundColor(android.graphics.Color.argb(220, 20, 20, 20))
+            layoutParams = FrameLayout.LayoutParams(320,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            ).apply {
+                gravity = Gravity.TOP or Gravity.END
+                setMargins(0, 120, 32, 0)
+            }
+            visibility = View.GONE
+            setPadding(8, 8, 8, 8)
+        }
+        root.addView(tracksOverlay)
+
+        // Next episode overlay
+        nextEpisodeOverlay = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            setBackgroundColor(android.graphics.Color.argb(200, 0, 0, 0))
+            layoutParams = FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            ).apply {
+                gravity = Gravity.BOTTOM or Gravity.END
+                setMargins(0, 0, 48, 48)
+            }
+            visibility = View.GONE
+            setPadding(24, 24, 24, 24)
+        }
+        nextEpisodeCountdownView = TextView(this).apply {
+            textSize = 18f
+            setTextColor(android.graphics.Color.WHITE)
+        }
+        val playNextBtn = Button(this).apply {
+            text = getString(R.string.play_next_episode)
+            setOnClickListener { playNextEpisode() }
+        }
+        val cancelNextBtn = Button(this).apply {
+            text = getString(R.string.cancel)
+            setOnClickListener {
+                nextEpisodeJob?.cancel()
+                nextEpisodeOverlay?.visibility = View.GONE
+            }
+        }
+        nextEpisodeOverlay!!.addView(nextEpisodeCountdownView)
+        nextEpisodeOverlay!!.addView(playNextBtn)
+        nextEpisodeOverlay!!.addView(cancelNextBtn)
+        root.addView(nextEpisodeOverlay)
+
+        setContentView(root)
     }
 
     private fun initializePlayer() {
-            // Create ExoPlayer instance
-            player = ExoPlayer.Builder(this).build().also { exoPlayer ->
+        trackSelector = DefaultTrackSelector(this)
+        player = ExoPlayer.Builder(this)
+            .setTrackSelector(trackSelector!!)
+            .build()
+            .also { exoPlayer ->
                 playerView?.player = exoPlayer
 
-                // Set up the media item
                 videoUrl?.let { url ->
-                    val mediaItem = MediaItem.fromUri(url)
-                    exoPlayer.setMediaItem(mediaItem)
+                    exoPlayer.setMediaItem(MediaItem.fromUri(url))
                     exoPlayer.prepare()
                     exoPlayer.playWhenReady = playWhenReady
                     exoPlayer.seekTo(playbackPosition)
                 }
 
-                // Add listener for playback state
                 exoPlayer.addListener(object : Player.Listener {
-                    override fun onPlaybackStateChanged(playbackState: Int) {
-                        when (playbackState) {
-                            Player.STATE_ENDED -> {
-                                // Video ended, could show replay option
-                                finish()
-                            }
-
-                            Player.STATE_IDLE -> {
-                                // Player is idle
-                            }
-
-                            Player.STATE_BUFFERING -> {
-                                // Player is buffering
-                                hideError()
-                            }
-
+                    override fun onPlaybackStateChanged(state: Int) {
+                        when (state) {
                             Player.STATE_READY -> {
-                                // Player is ready
                                 hideError()
+                                startSavingProgress()
+                                populateTracksOverlay()
                             }
+                            Player.STATE_ENDED -> {
+                                saveProgressJob?.cancel()
+                                if (nextEpisodeUrl != null) showNextEpisodeOverlay()
+                                else finish()
+                            }
+                            else -> {}
                         }
                     }
 
-                    override fun onPlayerError(error: androidx.media3.common.PlaybackException) {
+                    override fun onPlayerError(error: PlaybackException) {
                         showError(getString(R.string.video_error))
+                    }
+
+                    override fun onEvents(player: Player, events: Player.Events) {
+                        if (events.contains(Player.EVENT_POSITION_DISCONTINUITY) ||
+                            events.contains(Player.EVENT_IS_PLAYING_CHANGED)) {
+                            updateSkipIntroVisibility()
+                        }
                     }
                 })
             }
-        }
+    }
 
-        override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
-            // Handle D-pad controls
-            return when (keyCode) {
-                KeyEvent.KEYCODE_DPAD_CENTER,
-                KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE -> {
-                    player?.let {
-                        if (it.isPlaying) {
-                            it.pause()
-                        } else {
-                            it.play()
-                        }
-                    }
-                    true
-                }
-
-                KeyEvent.KEYCODE_MEDIA_PLAY -> {
-                    player?.play()
-                    true
-                }
-
-                KeyEvent.KEYCODE_MEDIA_PAUSE -> {
-                    player?.pause()
-                    true
-                }
-
-                KeyEvent.KEYCODE_MEDIA_FAST_FORWARD -> {
-                    player?.seekForward()
-                    true
-                }
-
-                KeyEvent.KEYCODE_MEDIA_REWIND -> {
-                    player?.seekBack()
-                    true
-                }
-
-                KeyEvent.KEYCODE_DPAD_LEFT,
-                KeyEvent.KEYCODE_BACK -> {
-                    releasePlayer()
-                    finish()
-                    true
-                }
-
-                else -> super.onKeyDown(keyCode, event)
-            }
-        }
-
-        override fun onStart() {
-            super.onStart()
-            if (player == null) {
-                initializePlayer()
-            }
-        }
-
-        override fun onStop() {
-            super.onStop()
-            releasePlayer()
-        }
-
-        override fun onDestroy() {
-            super.onDestroy()
-            // Ensure player is released if not already done in onStop
-            releasePlayer()
-        }
-
-        private fun releasePlayer() {
-            player?.release()
-            player = null
-        }
-
-        private fun showError(message: String) {
-            runOnUiThread {
-                errorTextView?.apply {
-                    text = message
-                    visibility = View.VISIBLE
-                }
-                playerView?.visibility = View.GONE
-            }
-        }
-
-        private fun hideError() {
-            runOnUiThread {
-                errorTextView?.visibility = View.GONE
-                playerView?.visibility = View.VISIBLE
+    private fun startSavingProgress() {
+        saveProgressJob?.cancel()
+        saveProgressJob = lifecycleScope.launch {
+            while (true) {
+                delay(5_000)
+                saveProgress()
             }
         }
     }
+
+    private suspend fun saveProgress() {
+        val p = player ?: return
+        val pos = p.currentPosition
+        val dur = p.duration.coerceAtLeast(0)
+        val cId = contentId ?: return
+        val url = videoUrl ?: return
+        localRepository.upsertContinueWatching(
+            ContinueWatchingEntity(
+                contentId = cId,
+                title = movieTitle ?: "",
+                posterPath = null,
+                videoUrl = url,
+                progressMs = pos,
+                durationMs = dur
+            )
+        )
+    }
+
+    private fun updateSkipIntroVisibility() {
+        if (introEndMs <= 0) return
+        val pos = player?.currentPosition ?: return
+        skipIntroButton?.visibility = if (pos < introEndMs) View.VISIBLE else View.GONE
+    }
+
+    private fun populateTracksOverlay() {
+        val exo = player ?: return
+        val tracks = exo.currentTracks
+        tracksOverlay?.removeAllViews()
+
+        var hasOptions = false
+
+        tracks.groups.forEach { group ->
+            when (group.type) {
+                C.TRACK_TYPE_AUDIO -> {
+                    if (group.length > 1) {
+                        hasOptions = true
+                        addTrackSectionHeader("Audio")
+                        for (i in 0 until group.length) {
+                            val label = group.getTrackFormat(i).language ?: "Track ${i + 1}"
+                            addTrackButton(label) {
+                                trackSelector?.setParameters(
+                                    trackSelector!!.buildUponParameters()
+                                        .setOverrideForType(
+                                            TrackSelectionOverride(group.mediaTrackGroup, listOf(i))
+                                        )
+                                )
+                                tracksOverlay?.visibility = View.GONE
+                            }
+                        }
+                    }
+                }
+                C.TRACK_TYPE_TEXT -> {
+                    hasOptions = true
+                    addTrackSectionHeader("Subtitles")
+                    addTrackButton("Off") {
+                        trackSelector?.setParameters(
+                            trackSelector!!.buildUponParameters()
+                                .setTrackTypeDisabled(C.TRACK_TYPE_TEXT, true)
+                        )
+                        tracksOverlay?.visibility = View.GONE
+                    }
+                    for (i in 0 until group.length) {
+                        val label = group.getTrackFormat(i).language ?: "Sub ${i + 1}"
+                        addTrackButton(label) {
+                            trackSelector?.setParameters(
+                                trackSelector!!.buildUponParameters()
+                                    .setTrackTypeDisabled(C.TRACK_TYPE_TEXT, false)
+                                    .setOverrideForType(
+                                        TrackSelectionOverride(group.mediaTrackGroup, listOf(i))
+                                    )
+                            )
+                            tracksOverlay?.visibility = View.GONE
+                        }
+                    }
+                }
+            }
+        }
+
+        tracksButton?.visibility = if (hasOptions) View.VISIBLE else View.GONE
+    }
+
+    private fun addTrackSectionHeader(label: String) {
+        tracksOverlay?.addView(TextView(this).apply {
+            text = label
+            setTextColor(android.graphics.Color.GRAY)
+            textSize = 13f
+            setPadding(16, 8, 16, 4)
+        })
+    }
+
+    private fun addTrackButton(label: String, onClick: () -> Unit) {
+        tracksOverlay?.addView(Button(this).apply {
+            text = label
+            setOnClickListener { onClick() }
+        })
+    }
+
+    private fun toggleSpeedOverlay() {
+        speedOverlay?.visibility = if (speedOverlay?.visibility == View.VISIBLE) View.GONE else View.VISIBLE
+        tracksOverlay?.visibility = View.GONE
+    }
+
+    private fun toggleTracksOverlay() {
+        tracksOverlay?.visibility = if (tracksOverlay?.visibility == View.VISIBLE) View.GONE else View.VISIBLE
+        speedOverlay?.visibility = View.GONE
+    }
+
+    private fun showNextEpisodeOverlay() {
+        nextEpisodeOverlay?.visibility = View.VISIBLE
+        nextEpisodeJob?.cancel()
+        nextEpisodeJob = lifecycleScope.launch {
+            for (i in 5 downTo 1) {
+                nextEpisodeCountdownView?.text = getString(R.string.next_episode_countdown, i)
+                delay(1_000)
+            }
+            playNextEpisode()
+        }
+    }
+
+    private fun playNextEpisode() {
+        nextEpisodeJob?.cancel()
+        nextEpisodeOverlay?.visibility = View.GONE
+        val nextUrl = nextEpisodeUrl ?: return
+        videoUrl = nextUrl
+        movieTitle = nextEpisodeTitle ?: movieTitle
+        contentId = "content_${nextUrl.hashCode()}"
+        nextEpisodeUrl = null
+        nextEpisodeTitle = null
+        releasePlayer()
+        playbackPosition = 0L
+        initializePlayer()
+    }
+
+    // Picture-in-Picture
+    override fun onUserLeaveHint() {
+        super.onUserLeaveHint()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && player?.isPlaying == true) {
+            enterPictureInPictureMode(
+                PictureInPictureParams.Builder()
+                    .setAspectRatio(Rational(16, 9))
+                    .build()
+            )
+        }
+    }
+
+    override fun onPictureInPictureModeChanged(
+        isInPictureInPictureMode: Boolean,
+        newConfig: Configuration
+    ) {
+        super.onPictureInPictureModeChanged(isInPictureInPictureMode, newConfig)
+        playerView?.useController = !isInPictureInPictureMode
+        val overlayVisibility = if (isInPictureInPictureMode) View.GONE else View.VISIBLE
+        speedButton?.visibility = overlayVisibility
+        skipIntroButton?.visibility = if (isInPictureInPictureMode) View.GONE else skipIntroButton?.visibility ?: View.GONE
+    }
+
+    override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
+        return when (keyCode) {
+            KeyEvent.KEYCODE_DPAD_CENTER, KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE -> {
+                player?.let { if (it.isPlaying) it.pause() else it.play() }
+                true
+            }
+            KeyEvent.KEYCODE_MEDIA_PLAY -> { player?.play(); true }
+            KeyEvent.KEYCODE_MEDIA_PAUSE -> { player?.pause(); true }
+            KeyEvent.KEYCODE_MEDIA_FAST_FORWARD -> { player?.seekForward(); true }
+            KeyEvent.KEYCODE_MEDIA_REWIND -> { player?.seekBack(); true }
+            KeyEvent.KEYCODE_DPAD_LEFT, KeyEvent.KEYCODE_BACK -> {
+                releasePlayer()
+                finish()
+                true
+            }
+            else -> super.onKeyDown(keyCode, event)
+        }
+    }
+
+    override fun onStart() {
+        super.onStart()
+        if (player == null && !videoUrl.isNullOrBlank()) {
+            lifecycleScope.launch {
+                val saved = localRepository.getContinueWatchingItem(contentId ?: return@launch)
+                playbackPosition = saved?.progressMs ?: playbackPosition
+                initializePlayer()
+            }
+        }
+    }
+
+    override fun onStop() {
+        super.onStop()
+        saveProgressJob?.cancel()
+        lifecycleScope.launch { saveProgress() }
+        releasePlayer()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        releasePlayer()
+    }
+
+    private fun releasePlayer() {
+        saveProgressJob?.cancel()
+        player?.release()
+        player = null
+        trackSelector = null
+    }
+
+    private fun showError(message: String) {
+        runOnUiThread {
+            errorTextView?.text = message
+            errorLayout?.visibility = View.VISIBLE
+            playerView?.visibility = View.GONE
+        }
+    }
+
+    private fun hideError() {
+        runOnUiThread {
+            errorLayout?.visibility = View.GONE
+            playerView?.visibility = View.VISIBLE
+        }
+    }
+
+    private fun hideSystemUI() {
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+        val controller = WindowCompat.getInsetsController(window, window.decorView)
+        controller.hide(WindowInsetsCompat.Type.systemBars())
+        controller.systemBarsBehavior =
+            WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+    }
+
+    companion object {
+        const val EXTRA_VIDEO_URL = "VIDEO_URL"
+        const val EXTRA_MOVIE_TITLE = "MOVIE_TITLE"
+        const val EXTRA_CONTENT_ID = "CONTENT_ID"
+        const val EXTRA_INTRO_END_MS = "INTRO_END_MS"
+        const val EXTRA_NEXT_EPISODE_URL = "NEXT_EPISODE_URL"
+        const val EXTRA_NEXT_EPISODE_TITLE = "NEXT_EPISODE_TITLE"
+    }
+}
