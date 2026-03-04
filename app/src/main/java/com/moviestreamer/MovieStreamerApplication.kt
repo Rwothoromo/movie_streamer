@@ -1,7 +1,21 @@
 package com.moviestreamer
 
 import android.app.Application
-import dagger.hilt.android.HiltAndroidApp
+import com.moviestreamer.di.networkModule
+import com.moviestreamer.di.repositoryModule
+import com.moviestreamer.di.useCaseModule
+import com.moviestreamer.di.viewModelModule
+import org.koin.android.ext.koin.androidContext
+import org.koin.android.ext.koin.androidLogger
+import org.koin.core.context.startKoin
 
-@HiltAndroidApp
-class MovieStreamerApplication : Application()
+class MovieStreamerApplication : Application() {
+    override fun onCreate() {
+        super.onCreate()
+        startKoin {
+            androidLogger()
+            androidContext(this@MovieStreamerApplication)
+            modules(networkModule, repositoryModule, useCaseModule, viewModelModule)
+        }
+    }
+}

@@ -3,56 +3,38 @@ package com.moviestreamer.di
 import com.moviestreamer.BuildConfig
 import com.moviestreamer.data.AuthInterceptor
 import com.moviestreamer.data.TmdbApi
-import dagger.Module
-import dagger.Provides
-import dagger.hilt.InstallIn
-import dagger.hilt.components.SingletonComponent
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
+import org.koin.dsl.module
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
-import javax.inject.Named
-import javax.inject.Singleton
 
-@Module
-@InstallIn(SingletonComponent::class)
-object NetworkModule {
+val networkModule = module {
+    single { AuthInterceptor(apiKey = BuildConfig.TMDB_API_KEY) }
 
-    private const val TMDB_BASE_URL = "https://api.themoviedb.org/3/"
-
-    @Provides
-    @Singleton
-    @Named("tmdb_api_key")
-    fun provideTmdbApiKey(): String = BuildConfig.TMDB_API_KEY
-
-    @Provides
-    @Singleton
-    fun provideAuthInterceptor(@Named("tmdb_api_key") apiKey: String): AuthInterceptor =
-        AuthInterceptor(apiKey)
-
-    @Provides
-    @Singleton
-    fun provideOkHttpClient(authInterceptor: AuthInterceptor): OkHttpClient {
-        val loggingInterceptor = HttpLoggingInterceptor().apply {
+    single {
+        HttpLoggingInterceptor().apply {
             level = if (BuildConfig.DEBUG) HttpLoggingInterceptor.Level.BODY
-            else HttpLoggingInterceptor.Level.BASIC
+                    else HttpLoggingInterceptor.Level.BASIC
         }
-        return OkHttpClient.Builder()
-            .addInterceptor(authInterceptor)
-            .addInterceptor(loggingInterceptor)
+    }
+
+    single {
+        OkHttpClient.Builder()
+            .addInterceptor(get<AuthInterceptor>())
+            .addInterceptor(get<HttpLoggingInterceptor>())
             .connectTimeout(30, TimeUnit.SECONDS)
             .readTimeout(30, TimeUnit.SECONDS)
             .build()
     }
 
-    @Provides
-    @Singleton
-    fun provideTmdbApi(okHttpClient: OkHttpClient): TmdbApi =
+    single {
         Retrofit.Builder()
-            .baseUrl(TMDB_BASE_URL)
-            .client(okHttpClient)
+            .baseUrl("https://api.themoviedb.org/3/")
+            .client(get())
             .addConverterFactory(GsonConverterFactory.create())
             .build()
             .create(TmdbApi::class.java)
+    }
 }

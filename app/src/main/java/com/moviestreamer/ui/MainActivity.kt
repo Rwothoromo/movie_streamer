@@ -6,16 +6,15 @@ import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.viewModels
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.Modifier
 import com.moviestreamer.BuildConfig
 import com.moviestreamer.player.PlayerActivity
-import dagger.hilt.android.AndroidEntryPoint
+import org.koin.androidx.viewmodel.ext.android.viewModel
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
-    private val viewModel: HomeViewModel by viewModels()
+    private val viewModel: HomeViewModel by viewModel()
     
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

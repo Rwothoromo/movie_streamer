@@ -2,17 +2,8 @@ package com.moviestreamer.di
 
 import com.moviestreamer.data.repository.MovieRepository
 import com.moviestreamer.data.repository.MovieRepositoryImpl
-import dagger.Binds
-import dagger.Module
-import dagger.hilt.InstallIn
-import dagger.hilt.components.SingletonComponent
-import javax.inject.Singleton
+import org.koin.dsl.module
 
-@Module
-@InstallIn(SingletonComponent::class)
-abstract class RepositoryModule {
-
-    @Binds
-    @Singleton
-    abstract fun bindMovieRepository(impl: MovieRepositoryImpl): MovieRepository
+val repositoryModule = module {
+    single<MovieRepository> { MovieRepositoryImpl(get()) }
 }
