@@ -7,8 +7,10 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.WindowInsetsController
 import android.widget.FrameLayout
+import android.widget.ImageButton
 import android.widget.TextView
 import android.app.Activity
+import android.graphics.Color
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
@@ -68,6 +70,24 @@ class PlayerActivity : Activity() {
             visibility = View.GONE
         }
 
+        // Create back button for TV navigation
+        val backButton = ImageButton(this).apply {
+            layoutParams = FrameLayout.LayoutParams(
+                80,
+                80
+            ).apply {
+                gravity = android.view.Gravity.TOP or android.view.Gravity.START
+                setMargins(32, 32, 0, 0)
+            }
+            setImageResource(android.R.drawable.ic_menu_close_clear_cancel)
+            setBackgroundColor(Color.argb(200, 0, 0, 0))
+            contentDescription = "Back to home"
+            setOnClickListener {
+                releasePlayer()
+                finish()
+            }
+        }
+
         val frameLayout = FrameLayout(this).apply {
             layoutParams = ViewGroup.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
@@ -76,6 +96,7 @@ class PlayerActivity : Activity() {
             setBackgroundColor(android.graphics.Color.BLACK)
             addView(playerView)
             addView(errorTextView)
+            addView(backButton)
         }
 
         setContentView(frameLayout)
@@ -195,6 +216,7 @@ class PlayerActivity : Activity() {
                     true
                 }
 
+                KeyEvent.KEYCODE_DPAD_LEFT,
                 KeyEvent.KEYCODE_BACK -> {
                     releasePlayer()
                     finish()
