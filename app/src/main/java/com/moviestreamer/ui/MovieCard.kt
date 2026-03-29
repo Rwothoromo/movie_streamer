@@ -38,12 +38,28 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.moviestreamer.R
 import com.moviestreamer.data.Movie
+import com.moviestreamer.download.DownloadStatus
+import com.moviestreamer.download.MovieDownloadManager
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.material3.IconButton
+import androidx.compose.material.icons.filled.Download
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.ErrorOutline
+import androidx.compose.material3.CircularProgressIndicator
+import org.koin.androidx.compose.get
+import com.moviestreamer.ui.MovieDownloadViewModel
 
 @Composable
 fun MovieCard(
     movie: Movie,
     onMovieClick: (Movie) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    downloadManager: MovieDownloadManager = get()
 ) {
     var isFocused by remember { mutableStateOf(false) }
     val focusColor = colorResource(R.color.focus_highlight)
@@ -51,6 +67,12 @@ fun MovieCard(
     val playableDesc = stringResource(R.string.play_movie_desc, movie.title)
     val browseDesc = stringResource(R.string.movie_poster_desc, movie.title)
     val cardContentDesc = if (movie.videoUrl != null) playableDesc else browseDesc
+
+    // Download state per card
+    val downloadViewModel = remember(movie.id) {
+        MovieDownloadViewModel(movie, downloadManager)
+    }
+    val downloadUiState by downloadViewModel.uiState.collectAsState()
 
     Card(
         modifier = modifier
@@ -104,24 +126,102 @@ fun MovieCard(
                     )
                 }
                 
-                // Playability indicator icon
-                Box(
-                    modifier = Modifier
-                        .align(Alignment.BottomEnd)
-                        .padding(8.dp)
-                        .size(32.dp)
-                        .background(
-                            color = Color.Black.copy(alpha = 0.7f),
-                            shape = RoundedCornerShape(16.dp)
-                        ),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = if (movie.videoUrl != null) Icons.Filled.PlayArrow else Icons.Filled.Info,
-                        contentDescription = if (movie.videoUrl != null) stringResource(R.string.playable_movie) else stringResource(R.string.browse_only_movie),
-                        tint = Color.White,
-                        modifier = Modifier.size(20.dp)
-                    )
+                // Download/Play/Progress UI for public domain movies
+                if (movie.videoUrl != null) {
+                    Box(
+                        modifier = Modifier
+                            .align(Alignment.BottomEnd)
+                            .padding(8.dp)
+                            .size(40.dp)
+                            .background(
+                                color = Color.Black.copy(alpha = 0.7f),
+                                shape = RoundedCornerShape(20.dp)
+                            ),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        when (val status = downloadUiState.status) {
+                            is DownloadStatus.Success -> {
+                                IconButton(onClick = { /* Play downloaded movie (handled by onMovieClick) */ }) {
+                                    Icon(
+                                        imageVector = Icons.Filled.CheckCircle,
+                                        contentDescription = "Downloaded",
+                                        tint = Color.Green,
+                                        modifier = Modifier.size(24.dp)
+                                    )
+                                }
+                                IconButton(onClick = { downloadViewModel.removeDownload() }) {
+                                    Icon(
+                                        imageVector = Icons.Filled.Delete,
+                                        contentDescription = "Remove Download",
+                                        tint = Color.White,
+                                        modifier = Modifier.size(20.dp)
+                                    )
+                                }
+                            }
+                            is DownloadStatus.Progress -> {
+                                CircularProgressIndicator(
+                                    progress = if (status.bytesTotal > 0) status.bytesDownloaded / status.bytesTotal.toFloat() else 0f,
+                                    color = Color.Yellow,
+                                    modifier = Modifier.size(24.dp),
+                                    strokeWidth = 3.dp
+                                )
+                            }
+                            is DownloadStatus.Failed -> {
+                                Icon(
+                                    imageVector = Icons.Filled.ErrorOutline,
+                                    contentDescription = "Download Failed",
+                                    tint = Color.Red,
+                                    modifier = Modifier.size(24.dp)
+                                )
+                                IconButton(onClick = { downloadViewModel.startDownload() }) {
+                                    Icon(
+                                        imageVector = Icons.Filled.Download,
+                                        contentDescription = "Retry Download",
+                                        tint = Color.White,
+                                        modifier = Modifier.size(20.dp)
+                                    )
+                                }
+                            }
+                            else -> {
+                                IconButton(onClick = { downloadViewModel.startDownload() }) {
+                                    Icon(
+                                        imageVector = Icons.Filled.Download,
+                                        contentDescription = "Download",
+                                        tint = Color.White,
+                                        modifier = Modifier.size(24.dp)
+                                    )
+                                }
+                            }
+                        }
+                        // Show error message if present
+                        downloadUiState.errorMessage?.let { msg ->
+                            Text(
+                                text = msg,
+                                color = Color.Red,
+                                fontSize = 10.sp,
+                                modifier = Modifier.align(Alignment.TopCenter).padding(top = 2.dp)
+                            )
+                        }
+                    }
+                } else {
+                    Box(
+                        modifier = Modifier
+                            .align(Alignment.BottomEnd)
+                            .padding(8.dp)
+                            .size(32.dp)
+                            .background(
+                                color = Color.Black.copy(alpha = 0.7f),
+                                shape = RoundedCornerShape(16.dp)
+                            ),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.Info,
+                            contentDescription = stringResource(R.string.browse_only_movie),
+                            tint = Color.White,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
                 }
             }
             

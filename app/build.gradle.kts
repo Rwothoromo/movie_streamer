@@ -60,6 +60,8 @@ android {
 }
 
 dependencies {
+    // Compose Material Icons (needed for Download, Error, etc.)
+    implementation("androidx.compose.material:material-icons-extended")
     // Compose for TV
     // Note: As of Feb 2024, Compose for TV is still in alpha
     // These are the latest stable alpha versions available
