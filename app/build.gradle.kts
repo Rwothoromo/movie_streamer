@@ -60,6 +60,13 @@ android {
 }
 
 dependencies {
+    // Torrent streaming: FrostWire jlibtorrent (local AAR/JAR dependencies)
+    // Place the following files in app/libs/ after downloading/building:
+    implementation(files("libs/jlibtorrent-2.0.12.7.jar"))
+    implementation(files("libs/jlibtorrent-android-arm-2.0.12.7.jar"))
+    implementation(files("libs/jlibtorrent-android-arm64-2.0.12.7.jar"))
+    implementation(files("libs/jlibtorrent-android-x86-2.0.12.7.jar"))
+    implementation(files("libs/jlibtorrent-android-x86_64-2.0.12.7.jar"))
     // Compose Material Icons (needed for Download, Error, etc.)
     implementation("androidx.compose.material:material-icons-extended")
     // Compose for TV

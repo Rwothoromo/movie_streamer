@@ -43,7 +43,9 @@ data class HomeUiState(
     val searchQuery: String = "",
     val searchResults: List<Movie> = emptyList(),
     val isLoading: Boolean = true,
-    val error: String? = null
+    val error: String? = null,
+    val torrentProgress: Float = 0f,
+    val torrentStatus: String? = null
 )
 
 class HomeViewModel(
@@ -62,7 +64,8 @@ class HomeViewModel(
     private val toggleFavoriteTvShowUseCase: ToggleFavoriteTvShowUseCase,
     private val getContinueWatchingUseCase: GetContinueWatchingUseCase,
     private val getPublicDomainTvEpisodesUseCase: GetPublicDomainTvEpisodesUseCase,
-    private val getFreeIptvChannelsUseCase: GetFreeIptvChannelsUseCase
+    private val getFreeIptvChannelsUseCase: GetFreeIptvChannelsUseCase,
+    private val torrentRepository: com.moviestreamer.data.repository.TorrentRepository
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(HomeUiState())
     val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
@@ -101,18 +104,6 @@ class HomeViewModel(
                 val topRated = getTopRatedMoviesUseCase().getOrDefault(emptyList())
                 val popularTv = getPopularTvShowsUseCase().getOrDefault(emptyList())
                 val topRatedTv = getTopRatedTvShowsUseCase().getOrDefault(emptyList())
-                val airingToday = getAiringTodayTvShowsUseCase().getOrDefault(emptyList())
-                _uiState.value = _uiState.value.copy(
-                    popularMovies = popular,
-                    topRatedMovies = topRated,
-                    publicDomainMovies = publicDomain,
-                    publicDomainTvEpisodes = getPublicDomainTvEpisodesUseCase(),
-                    freeIptvChannels = getFreeIptvChannelsUseCase(),
-                    popularTvShows = popularTv,
-                    topRatedTvShows = topRatedTv,
-                    airingTodayTvShows = airingToday,
-                    isLoading = false
-                )
                 allMovies = popular + topRated + publicDomain
             } catch (e: Exception) {
                 _uiState.value = _uiState.value.copy(isLoading = false, error = e.message)
@@ -125,10 +116,29 @@ class HomeViewModel(
     }
 
     fun updateSearchQuery(query: String) {
-        _uiState.value = _uiState.value.copy(searchQuery = query)
         _uiState.value = _uiState.value.copy(
+            searchQuery = query,
             searchResults = searchMoviesUseCase(query, allMovies)
         )
+    }
+
+    fun startTorrentStream(magnetUri: String, downloadDir: java.io.File, onReady: (file: java.io.File?) -> Unit) {
+        _uiState.value = _uiState.value.copy(torrentProgress = 0f, torrentStatus = "Starting torrent...")
+        torrentRepository.startTorrentStream(magnetUri, downloadDir) { file, progress, status ->
+            _uiState.value = _uiState.value.copy(
+                torrentProgress = progress,
+                torrentStatus = status
+            )
+            if (file != null && progress >= 1f) {
+                _uiState.value = _uiState.value.copy(torrentStatus = "Ready to play")
+                onReady(file)
+            }
+        }
+    }
+
+    fun stopTorrentStream() {
+        torrentRepository.stopTorrentStream()
+        _uiState.value = _uiState.value.copy(torrentProgress = 0f, torrentStatus = null)
     }
 
     fun toggleFavoriteMovie(movie: Movie) {

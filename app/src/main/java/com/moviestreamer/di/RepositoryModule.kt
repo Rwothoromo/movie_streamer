@@ -8,6 +8,7 @@ import org.koin.dsl.module
 
 val repositoryModule = module {
     single<MovieRepository> { MovieRepositoryImpl(get()) }
+    single<com.moviestreamer.data.repository.TorrentRepository> { com.moviestreamer.data.repository.TorrentRepositoryImpl(get()) }
     single<LocalRepository> {
         LocalRepositoryImpl(
             get(), // FavoriteMovieDao
