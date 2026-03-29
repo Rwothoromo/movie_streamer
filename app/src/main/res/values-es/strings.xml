@@ -1,5 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+            <string name="genres">Géneros</string>
+        <string name="playable_movie">Película reproducible</string>
+        <string name="browse_only_movie">Película solo para ver</string>
+        <string name="similar_shows">Programas similares</string>
+        <string name="next_episode">Siguiente episodio</string>
+        <string name="browse_only_show">Serie solo para ver</string>
+        <string name="first_air_date">Fecha de estreno</string>
+        <string name="vote_average_format">Valoración: %.1f</string>
+        <string name="show_more">Mostrar más</string>
+        <string name="show_less">Mostrar menos</string>
     <string name="app_name">Movie Streamer</string>
     <string name="browse_title">Explorar películas</string>
     <string name="popular_movies">Películas populares</string>
@@ -28,6 +38,14 @@
     <string name="classic_tv_episodes">Episodios clásicos</string>
     <string name="free_live_channels">Canales en directo gratuitos</string>
     <string name="browse_by_genre">Explorar por género</string>
+
+    <string name="confirm_pin_label">Confirmar PIN</string>
+
+    <string name="pin_label">PIN</string>
+
+    <!-- tracks_button translation present only once -->
+    <string name="tracks_button">CC/Audio</string>
+    <string name="speed_normal">1x</string>
     <string name="search_title">Buscar</string>
     <string name="search_movies_and_tv">Buscar películas y series…</string>
     <string name="favorites">Favoritos</string>

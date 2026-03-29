@@ -25,6 +25,7 @@ sealed class Screen {
     data class TvSeason(val tvShow: TvShow, val seasonNumber: Int, val season: Season?) : Screen()
 }
 
+@androidx.media3.common.util.UnstableApi
 class MainActivity : ComponentActivity() {
     private val viewModel: HomeViewModel by viewModel()
     
