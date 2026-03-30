@@ -105,6 +105,15 @@ class HomeViewModel(
                 val popularTv = getPopularTvShowsUseCase().getOrDefault(emptyList())
                 val topRatedTv = getTopRatedTvShowsUseCase().getOrDefault(emptyList())
                 allMovies = popular + topRated + publicDomain
+                _uiState.value = _uiState.value.copy(
+                    publicDomainMovies = publicDomain,
+                    popularMovies = popular,
+                    topRatedMovies = topRated,
+                    popularTvShows = popularTv,
+                    topRatedTvShows = topRatedTv,
+                    isLoading = false,
+                    error = null
+                )
             } catch (e: Exception) {
                 _uiState.value = _uiState.value.copy(isLoading = false, error = e.message)
             }
