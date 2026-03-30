@@ -38,7 +38,9 @@ class HomeViewModelTest {
     private val toggleFavoriteTvShowUseCase: ToggleFavoriteTvShowUseCase = mockk()
     private val getContinueWatchingUseCase: GetContinueWatchingUseCase = mockk()
     private val getPublicDomainTvEpisodesUseCase: GetPublicDomainTvEpisodesUseCase = mockk()
+
     private val getFreeIptvChannelsUseCase: GetFreeIptvChannelsUseCase = mockk()
+    private val torrentRepository: com.moviestreamer.data.repository.TorrentRepository = mockk()
 
     private val sampleMovies = listOf(
         Movie(id = 1, title = "Movie 1", overview = "Desc", posterPath = null,
@@ -92,7 +94,8 @@ class HomeViewModelTest {
         toggleFavoriteTvShowUseCase = toggleFavoriteTvShowUseCase,
         getContinueWatchingUseCase = getContinueWatchingUseCase,
         getPublicDomainTvEpisodesUseCase = getPublicDomainTvEpisodesUseCase,
-        getFreeIptvChannelsUseCase = getFreeIptvChannelsUseCase
+        getFreeIptvChannelsUseCase = getFreeIptvChannelsUseCase,
+        torrentRepository = torrentRepository
     )
 
     @Test
