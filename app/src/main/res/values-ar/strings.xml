@@ -1,6 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- RTL layout is automatically applied by Android when locale is Arabic -->
 <resources>
+        <string name="playable_movie">فيلم قابل للتشغيل</string>
+        <string name="browse_only_movie">فيلم للعرض فقط</string>
+        <string name="similar_shows">عروض مشابهة</string>
+        <string name="next_episode">الحلقة التالية</string>
+        <string name="browse_only_show">عرض للعرض فقط</string>
+        <string name="first_air_date">تاريخ العرض الأول</string>
+        <string name="vote_average_format">التقييم: %.1f</string>
+        <string name="show_more">عرض المزيد</string>
+        <string name="show_less">عرض أقل</string>
     <string name="app_name">Movie Streamer</string>
     <string name="browse_title">تصفح الأفلام</string>
     <string name="popular_movies">الأفلام الشائعة</string>
@@ -28,7 +37,14 @@
     <string name="next_episode_countdown">الحلقة التالية خلال %d…</string>
     <string name="classic_tv_episodes">حلقات كلاسيكية</string>
     <string name="free_live_channels">قنوات مباشرة مجانية</string>
+
+    <string name="pin_label">PIN</string>
+    <string name="confirm_pin_label">تأكيد PIN</string>
+    <string name="genres">الأنواع</string>
+
+    <string name="tracks_button">CC/الصوت</string>
     <string name="browse_by_genre">تصفح حسب النوع</string>
+    <string name="speed_normal">1x</string>
     <string name="search_title">بحث</string>
     <string name="search_movies_and_tv">البحث في الأفلام والمسلسلات…</string>
     <string name="favorites">المفضلة</string>

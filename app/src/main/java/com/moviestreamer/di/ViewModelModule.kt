@@ -24,19 +24,10 @@ val viewModelModule = module {
             toggleFavoriteTvShowUseCase = get(),
             getContinueWatchingUseCase = get(),
             getPublicDomainTvEpisodesUseCase = get(),
-            getFreeIptvChannelsUseCase = get()
+            getFreeIptvChannelsUseCase = get(),
+            torrentRepository = get()
         )
     }
-    viewModel {
-        SearchViewModel(
-            searchMoviesApiUseCase = get(),
-            searchTvShowsUseCase = get()
-        )
-    }
-    viewModel {
-        GenreViewModel(
-            getMoviesByGenreUseCase = get(),
-            getTvShowsByGenreUseCase = get()
-        )
-    }
+    viewModel { SearchViewModel(searchMoviesApiUseCase = get(), searchTvShowsUseCase = get()) }
+    viewModel { GenreViewModel(getMoviesByGenreUseCase = get(), getTvShowsByGenreUseCase = get()) }
 }

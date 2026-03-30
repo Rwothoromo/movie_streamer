@@ -31,6 +31,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
 
+@androidx.media3.common.util.UnstableApi
 class PlayerActivity : AppCompatActivity() {
 
     private var player: ExoPlayer? = null
@@ -493,11 +494,15 @@ class PlayerActivity : AppCompatActivity() {
         }
     }
 
+    @androidx.annotation.RequiresApi(Build.VERSION_CODES.O)
     override fun onPictureInPictureModeChanged(
         isInPictureInPictureMode: Boolean,
         newConfig: Configuration
     ) {
-        super.onPictureInPictureModeChanged(isInPictureInPictureMode, newConfig)
+        // Only call super if API >= 26
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            super.onPictureInPictureModeChanged(isInPictureInPictureMode, newConfig)
+        }
         playerView?.useController = !isInPictureInPictureMode
         val overlayVisibility = if (isInPictureInPictureMode) View.GONE else View.VISIBLE
         speedButton?.visibility = overlayVisibility

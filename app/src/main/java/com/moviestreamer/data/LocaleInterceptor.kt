@@ -14,7 +14,13 @@ import java.util.Locale
  */
 class LocaleInterceptor(private val context: Context) : Interceptor {
     override fun intercept(chain: Interceptor.Chain): Response {
-        val locale: Locale = context.resources.configuration.locales[0]
+        val configuration = context.resources.configuration
+        val locale: Locale = if (android.os.Build.VERSION.SDK_INT >= 24) {
+            configuration.locales[0]
+        } else {
+            @Suppress("DEPRECATION")
+            configuration.locale
+        }
         val language = buildString {
             append(locale.language)
             if (locale.country.isNotEmpty()) {

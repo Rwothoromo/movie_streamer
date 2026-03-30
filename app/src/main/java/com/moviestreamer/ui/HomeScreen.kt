@@ -1,3 +1,4 @@
+
 package com.moviestreamer.ui
 
 import androidx.compose.foundation.background
@@ -9,6 +10,9 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -19,7 +23,14 @@ import com.moviestreamer.R
 import com.moviestreamer.data.Movie
 import com.moviestreamer.data.TvShow
 import com.moviestreamer.data.local.ContinueWatchingEntity
+import java.io.File
+import android.os.Environment
+import android.widget.Toast
+import androidx.compose.ui.platform.LocalContext
+import androidx.media3.common.util.UnstableApi
 
+
+@androidx.media3.common.util.UnstableApi
 @Composable
 fun HomeScreen(
     viewModel: HomeViewModel,
@@ -37,13 +48,15 @@ fun HomeScreen(
             .fillMaxSize()
             .background(Color(0xFF121212))
     ) {
+        var showTorrentDialog by remember { mutableStateOf(false) }
+        var magnetLink by remember { mutableStateOf("") }
+        val context = LocalContext.current
         when {
             uiState.isLoading -> {
                 CircularProgressIndicator(
                     modifier = Modifier.align(Alignment.Center)
                 )
             }
-            
             uiState.error != null -> {
                 Text(
                     text = stringResource(R.string.error_loading),
@@ -54,8 +67,86 @@ fun HomeScreen(
                     fontSize = 18.sp
                 )
             }
-            
+            uiState.torrentStatus != null -> {
+                Column(
+                    modifier = Modifier.align(Alignment.Center),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = uiState.torrentStatus ?: "",
+                        color = Color.White,
+                        fontSize = 20.sp,
+                        modifier = Modifier.padding(bottom = 16.dp)
+                    )
+                    LinearProgressIndicator(
+                        progress = uiState.torrentProgress,
+                        modifier = Modifier.width(320.dp).height(8.dp)
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Button(onClick = { viewModel.stopTorrentStream() }) {
+                        Text("Cancel", color = Color.White)
+                    }
+                }
+            }
             else -> {
+                // Torrent streaming button
+                Row(modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(24.dp)) {
+                    Button(
+                        onClick = { showTorrentDialog = true },
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2D7D46))
+                    ) {
+                        Text("Stream via Torrent", color = Color.White, fontSize = 18.sp)
+                    }
+                }
+
+                if (showTorrentDialog) {
+                    AlertDialog(
+                        onDismissRequest = { showTorrentDialog = false },
+                        title = { Text("Enter Magnet Link") },
+                        text = {
+                            OutlinedTextField(
+                                value = magnetLink,
+                                onValueChange = { magnetLink = it },
+                                label = { Text("Magnet URI") },
+                                singleLine = true,
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                        },
+                        confirmButton = {
+                            Button(
+                                onClick = {
+                                    showTorrentDialog = false
+                                    if (magnetLink.isNotBlank()) {
+                                        val downloadDir = context.getExternalFilesDir(Environment.DIRECTORY_MOVIES) ?: context.filesDir
+                                        viewModel.startTorrentStream(magnetLink, downloadDir) { file ->
+                                            if (file != null && file.exists()) {
+                                                val intent = android.content.Intent(context, com.moviestreamer.player.PlayerActivity::class.java).apply {
+                                                    putExtra("EXTRA_VIDEO_URL", file.absolutePath)
+                                                    putExtra("EXTRA_MOVIE_TITLE", "Torrent Stream")
+                                                }
+                                                context.startActivity(intent)
+                                                viewModel.stopTorrentStream()
+                                            } else {
+                                                Toast.makeText(context, "Failed to start torrent stream", Toast.LENGTH_LONG).show()
+                                                viewModel.stopTorrentStream()
+                                            }
+                                        }
+                                    }
+                                },
+                                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2D7D46))
+                            ) {
+                                Text("Start Streaming", color = Color.White)
+                            }
+                        },
+                        dismissButton = {
+                            OutlinedButton(onClick = { showTorrentDialog = false }) {
+                                Text("Cancel")
+                            }
+                        }
+                    )
+                }
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
                     contentPadding = PaddingValues(vertical = 32.dp)
