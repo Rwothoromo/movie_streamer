@@ -1,0 +1,73 @@
+name: Submit Your Movie / Short Film
+description: Propose original or open-license content for inclusion in Movie Streamer.
+title: "[Content Submission]: "
+labels:
+  - enhancement
+  - documentation
+body:
+  - type: input
+    id: title
+    attributes:
+      label: Title
+      description: The film or short title as it should appear in the app.
+      placeholder: Night of the Living Dead
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: Share a short synopsis and any notable details.
+      placeholder: A brief overview of the film or short.
+    validations:
+      required: true
+
+  - type: input
+    id: archive_url
+    attributes:
+      label: Archive.org URL
+      description: Public playback or item page URL hosted on Archive.org.
+      placeholder: https://archive.org/details/...
+    validations:
+      required: true
+
+  - type: dropdown
+    id: license
+    attributes:
+      label: License
+      description: Select the legal license for this content.
+      options:
+        - Public Domain
+        - CC0
+        - CC BY
+        - CC BY-SA
+        - Other (explain below)
+    validations:
+      required: true
+
+  - type: input
+    id: poster_url
+    attributes:
+      label: Poster Image URL
+      description: Optional poster or cover image link.
+      placeholder: https://...
+    validations:
+      required: false
+
+  - type: textarea
+    id: attribution
+    attributes:
+      label: Attribution / Creator Information
+      description: Credit the creator, rights holder, or archive source.
+      placeholder: Created by..., archived by..., attribution required as...
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: legal_confirmation
+    attributes:
+      label: Legal confirmation
+      options:
+        - label: I confirm this content is legal to distribute/stream and matches the selected license.
+          required: true
