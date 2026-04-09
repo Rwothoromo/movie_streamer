@@ -1,12 +1,36 @@
-
 package com.moviestreamer.ui
 
+import android.os.Environment
+import android.widget.Toast
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.*
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Switch
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -16,6 +40,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -23,12 +48,8 @@ import com.moviestreamer.R
 import com.moviestreamer.data.Movie
 import com.moviestreamer.data.TvShow
 import com.moviestreamer.data.local.ContinueWatchingEntity
-import java.io.File
-import android.os.Environment
-import android.widget.Toast
-import androidx.compose.ui.platform.LocalContext
-import androidx.media3.common.util.UnstableApi
-
+import com.moviestreamer.data.local.UserProfileEntity
+import com.moviestreamer.ui.parental.ParentalControlsManager
 
 @androidx.media3.common.util.UnstableApi
 @Composable
@@ -42,15 +63,58 @@ fun HomeScreen(
     modifier: Modifier = Modifier
 ) {
     val uiState by viewModel.uiState.collectAsState()
-    
+    val context = LocalContext.current
+    val parentalControlsManager = remember { ParentalControlsManager(context) }
+    var showTorrentDialog by remember { mutableStateOf(false) }
+    var showSettingsDialog by remember { mutableStateOf(false) }
+    var showProfileManager by remember { mutableStateOf(false) }
+    var magnetLink by remember { mutableStateOf("") }
+
     Box(
         modifier = modifier
             .fillMaxSize()
             .background(Color(0xFF121212))
     ) {
-        var showTorrentDialog by remember { mutableStateOf(false) }
-        var magnetLink by remember { mutableStateOf("") }
-        val context = LocalContext.current
+        if (uiState.showProfilePicker && uiState.profiles.isNotEmpty()) {
+            ProfilePickerDialog(
+                profiles = uiState.profiles,
+                activeProfile = uiState.activeProfile,
+                parentalControlsManager = parentalControlsManager,
+                onDismiss = viewModel::dismissProfilePicker,
+                onSelectProfile = { profileId, makeDefault -> viewModel.selectProfile(profileId, makeDefault) },
+                onCreateProfile = viewModel::createProfile
+            )
+        }
+
+        if (showSettingsDialog) {
+            SettingsDialog(
+                uiState = uiState,
+                parentalControlsManager = parentalControlsManager,
+                onDismiss = { showSettingsDialog = false },
+                onNotificationsChanged = viewModel::setNotificationsEnabled,
+                onRemindersChanged = viewModel::setReminderNotificationsEnabled,
+                onNewContentChanged = viewModel::setNewContentNotificationsEnabled,
+                onAnalyticsChanged = viewModel::setAnalyticsEnabled
+            )
+        }
+
+        if (showProfileManager) {
+            ProfilePickerDialog(
+                profiles = uiState.profiles,
+                activeProfile = uiState.activeProfile,
+                parentalControlsManager = parentalControlsManager,
+                onDismiss = { showProfileManager = false },
+                onSelectProfile = { profileId, makeDefault ->
+                    viewModel.selectProfile(profileId, makeDefault)
+                    showProfileManager = false
+                },
+                onCreateProfile = { name, isKids ->
+                    viewModel.createProfile(name, isKids)
+                    showProfileManager = false
+                }
+            )
+        }
+
         when {
             uiState.isLoading -> {
                 CircularProgressIndicator(
@@ -73,43 +137,50 @@ fun HomeScreen(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
-                        text = uiState.torrentStatus ?: "",
+                        text = uiState.torrentStatus.orEmpty(),
                         color = Color.White,
                         fontSize = 20.sp,
                         modifier = Modifier.padding(bottom = 16.dp)
                     )
                     LinearProgressIndicator(
                         progress = uiState.torrentProgress,
-                        modifier = Modifier.width(320.dp).height(8.dp)
+                        modifier = Modifier
+                            .width(320.dp)
+                            .height(8.dp)
                     )
                     Spacer(modifier = Modifier.height(16.dp))
                     Button(onClick = { viewModel.stopTorrentStream() }) {
-                        Text("Cancel", color = Color.White)
+                        Text(stringResource(R.string.cancel), color = Color.White)
                     }
                 }
             }
             else -> {
-                // Torrent streaming button
-                Row(modifier = Modifier
-                    .align(Alignment.TopEnd)
-                    .padding(24.dp)) {
+                Row(
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(24.dp)
+                ) {
                     Button(
                         onClick = { showTorrentDialog = true },
                         colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2D7D46))
                     ) {
-                        Text("Stream via Torrent", color = Color.White, fontSize = 18.sp)
+                        Text(
+                            text = stringResource(R.string.stream_via_torrent),
+                            color = Color.White,
+                            fontSize = 18.sp
+                        )
                     }
                 }
 
                 if (showTorrentDialog) {
                     AlertDialog(
                         onDismissRequest = { showTorrentDialog = false },
-                        title = { Text("Enter Magnet Link") },
+                        title = { Text(stringResource(R.string.enter_magnet_link)) },
                         text = {
                             OutlinedTextField(
                                 value = magnetLink,
                                 onValueChange = { magnetLink = it },
-                                label = { Text("Magnet URI") },
+                                label = { Text(stringResource(R.string.magnet_uri)) },
                                 singleLine = true,
                                 modifier = Modifier.fillMaxWidth()
                             )
@@ -129,7 +200,7 @@ fun HomeScreen(
                                                 context.startActivity(intent)
                                                 viewModel.stopTorrentStream()
                                             } else {
-                                                Toast.makeText(context, "Failed to start torrent stream", Toast.LENGTH_LONG).show()
+                                                Toast.makeText(context, context.getString(R.string.failed_torrent_stream), Toast.LENGTH_LONG).show()
                                                 viewModel.stopTorrentStream()
                                             }
                                         }
@@ -137,44 +208,72 @@ fun HomeScreen(
                                 },
                                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2D7D46))
                             ) {
-                                Text("Start Streaming", color = Color.White)
+                                Text(stringResource(R.string.start_streaming), color = Color.White)
                             }
                         },
                         dismissButton = {
                             OutlinedButton(onClick = { showTorrentDialog = false }) {
-                                Text("Cancel")
+                                Text(stringResource(R.string.cancel))
                             }
                         }
                     )
                 }
+
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
                     contentPadding = PaddingValues(vertical = 32.dp)
                 ) {
-                    // App Title
                     item {
-                        Text(
-                            text = stringResource(R.string.app_name),
-                            modifier = Modifier.padding(start = 48.dp, bottom = 16.dp),
-                            color = Color.White,
-                            fontSize = 48.sp
-                        )
-                    }
-
-                    // Navigation buttons
-                    item {
-                        Row(modifier = Modifier.padding(horizontal = 48.dp, vertical = 8.dp)) {
-                            TextButton(onClick = onSearchClick) {
-                                Text("🔍 Search", color = Color.White, fontSize = 18.sp)
-                            }
-                            Spacer(modifier = Modifier.width(16.dp))
-                            TextButton(onClick = onGenreClick) {
-                                Text("🎭 Browse Genres", color = Color.White, fontSize = 18.sp)
+                        Column(modifier = Modifier.padding(start = 48.dp, bottom = 16.dp)) {
+                            Text(
+                                text = stringResource(R.string.app_name),
+                                color = Color.White,
+                                fontSize = 48.sp
+                            )
+                            uiState.activeProfile?.let { profile ->
+                                Text(
+                                    text = stringResource(R.string.active_profile_format, profile.avatar, profile.name),
+                                    color = Color.LightGray,
+                                    fontSize = 18.sp,
+                                    modifier = Modifier.padding(top = 6.dp)
+                                )
                             }
                         }
                     }
 
-                    // Continue Watching
+                    item {
+                        Row(
+                            modifier = Modifier.padding(horizontal = 48.dp, vertical = 8.dp),
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            TextButton(onClick = onSearchClick) {
+                                Text(stringResource(R.string.search_action), color = Color.White, fontSize = 18.sp)
+                            }
+                            TextButton(onClick = onGenreClick) {
+                                Text(stringResource(R.string.browse_genres_action), color = Color.White, fontSize = 18.sp)
+                            }
+                            TextButton(onClick = { showProfileManager = true }) {
+                                Text(stringResource(R.string.manage_profiles), color = Color.White, fontSize = 18.sp)
+                            }
+                            TextButton(onClick = { showSettingsDialog = true }) {
+                                Text(stringResource(R.string.settings_title), color = Color.White, fontSize = 18.sp)
+                            }
+                        }
+                    }
+
+                    if (uiState.recommendedMovies.isNotEmpty() && !uiState.recommendationsDismissed) {
+                        item {
+                            RecommendationsRow(
+                                title = stringResource(R.string.because_you_watched),
+                                subtitle = uiState.recommendationReason,
+                                movies = uiState.recommendedMovies,
+                                onMovieClick = onMovieClick,
+                                onRefresh = viewModel::refreshRecommendations,
+                                onDismiss = viewModel::dismissRecommendations
+                            )
+                        }
+                    }
+
                     if (uiState.continueWatching.isNotEmpty()) {
                         item {
                             ContinueWatchingRow(
@@ -184,29 +283,26 @@ fun HomeScreen(
                         }
                     }
 
-                    // My Favorites - Movies
                     if (uiState.favoriteMovies.isNotEmpty()) {
                         item {
                             MovieRow(
-                                title = "My Favorites",
+                                title = stringResource(R.string.favorite_movies),
                                 movies = uiState.favoriteMovies,
                                 onMovieClick = onMovieClick
                             )
                         }
                     }
 
-                    // My Favorites - TV Shows
                     if (uiState.favoriteTvShows.isNotEmpty()) {
                         item {
                             TvShowRow(
-                                title = "Favorite Shows",
+                                title = stringResource(R.string.favorite_tv_shows),
                                 tvShows = uiState.favoriteTvShows,
                                 onTvShowClick = onTvShowClick
                             )
                         }
                     }
 
-                    // Public Domain Movies (always available)
                     if (uiState.publicDomainMovies.isNotEmpty()) {
                         item {
                             MovieRow(
@@ -217,7 +313,6 @@ fun HomeScreen(
                         }
                     }
 
-                    // Free Classic TV Episodes
                     if (uiState.publicDomainTvEpisodes.isNotEmpty()) {
                         item {
                             MovieRow(
@@ -228,7 +323,6 @@ fun HomeScreen(
                         }
                     }
 
-                    // Free Live Channels (IPTV)
                     if (uiState.freeIptvChannels.isNotEmpty()) {
                         item {
                             MovieRow(
@@ -238,8 +332,7 @@ fun HomeScreen(
                             )
                         }
                     }
-                    
-                    // Popular Movies (from TMDB)
+
                     if (uiState.popularMovies.isNotEmpty()) {
                         item {
                             MovieRow(
@@ -249,8 +342,7 @@ fun HomeScreen(
                             )
                         }
                     }
-                    
-                    // Top Rated Movies (from TMDB)
+
                     if (uiState.topRatedMovies.isNotEmpty()) {
                         item {
                             MovieRow(
@@ -261,7 +353,6 @@ fun HomeScreen(
                         }
                     }
 
-                    // Popular TV Shows
                     if (uiState.popularTvShows.isNotEmpty()) {
                         item {
                             TvShowRow(
@@ -272,7 +363,6 @@ fun HomeScreen(
                         }
                     }
 
-                    // Top Rated TV Shows
                     if (uiState.topRatedTvShows.isNotEmpty()) {
                         item {
                             TvShowRow(
@@ -283,7 +373,6 @@ fun HomeScreen(
                         }
                     }
 
-                    // Airing Today TV Shows
                     if (uiState.airingTodayTvShows.isNotEmpty()) {
                         item {
                             TvShowRow(
@@ -300,6 +389,274 @@ fun HomeScreen(
 }
 
 @Composable
+private fun RecommendationsRow(
+    title: String,
+    subtitle: String?,
+    movies: List<Movie>,
+    onMovieClick: (Movie) -> Unit,
+    onRefresh: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    Column(modifier = Modifier.padding(vertical = 12.dp)) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 48.dp, vertical = 8.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column {
+                Text(text = title, color = Color.White, fontSize = 24.sp)
+                if (!subtitle.isNullOrBlank()) {
+                    Text(text = subtitle, color = Color.LightGray, fontSize = 14.sp)
+                }
+            }
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                TextButton(onClick = onRefresh) {
+                    Text(text = stringResource(R.string.refresh), color = Color.White)
+                }
+                TextButton(onClick = onDismiss) {
+                    Text(text = stringResource(R.string.dismiss), color = Color.White)
+                }
+            }
+        }
+        LazyRow(
+            contentPadding = PaddingValues(horizontal = 48.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            items(movies, key = { it.id }) { movie ->
+                MovieCard(movie = movie, onMovieClick = onMovieClick)
+            }
+        }
+    }
+}
+
+@Composable
+private fun ProfilePickerDialog(
+    profiles: List<UserProfileEntity>,
+    activeProfile: UserProfileEntity?,
+    parentalControlsManager: ParentalControlsManager,
+    onDismiss: () -> Unit,
+    onSelectProfile: (Long, Boolean) -> Unit,
+    onCreateProfile: (String, Boolean) -> Unit
+) {
+    val context = LocalContext.current
+    var newProfileName by remember { mutableStateOf("") }
+    var createKidsProfile by remember { mutableStateOf(false) }
+    var rememberAsDefault by remember { mutableStateOf(true) }
+    var pendingKidsProfile by remember { mutableStateOf<UserProfileEntity?>(null) }
+    var pinValue by remember { mutableStateOf("") }
+
+    if (pendingKidsProfile != null) {
+        AlertDialog(
+            onDismissRequest = {
+                pendingKidsProfile = null
+                pinValue = ""
+            },
+            title = { Text(stringResource(R.string.enter_kids_pin)) },
+            text = {
+                OutlinedTextField(
+                    value = pinValue,
+                    onValueChange = { pinValue = it.take(8) },
+                    label = { Text(stringResource(R.string.pin_label)) },
+                    singleLine = true
+                )
+            },
+            confirmButton = {
+                Button(onClick = {
+                    if (parentalControlsManager.verifyPin(pinValue)) {
+                        pendingKidsProfile?.let { onSelectProfile(it.id, rememberAsDefault) }
+                        pendingKidsProfile = null
+                        pinValue = ""
+                    } else {
+                        Toast.makeText(context, context.getString(R.string.invalid_pin), Toast.LENGTH_SHORT).show()
+                    }
+                }) {
+                    Text(stringResource(R.string.confirm))
+                }
+            },
+            dismissButton = {
+                OutlinedButton(onClick = {
+                    pendingKidsProfile = null
+                    pinValue = ""
+                }) {
+                    Text(stringResource(R.string.cancel))
+                }
+            }
+        )
+    }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.choose_profile)) },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                profiles.forEach { profile ->
+                    OutlinedButton(
+                        onClick = {
+                            if (profile.isKids && parentalControlsManager.isEnabled && parentalControlsManager.isPinSet) {
+                                pendingKidsProfile = profile
+                            } else {
+                                onSelectProfile(profile.id, rememberAsDefault)
+                            }
+                        },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text(
+                            text = if (profile.id == activeProfile?.id) {
+                                context.getString(R.string.current_profile_format, profile.avatar, profile.name)
+                            } else {
+                                context.getString(R.string.active_profile_format, profile.avatar, profile.name)
+                            }
+                        )
+                    }
+                }
+
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Checkbox(checked = rememberAsDefault, onCheckedChange = { rememberAsDefault = it })
+                    Text(text = stringResource(R.string.remember_default_profile), color = Color.White)
+                }
+
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(text = stringResource(R.string.add_profile), color = Color.White, fontSize = 18.sp)
+                OutlinedTextField(
+                    value = newProfileName,
+                    onValueChange = { newProfileName = it },
+                    label = { Text(stringResource(R.string.profile_name)) },
+                    modifier = Modifier.fillMaxWidth()
+                )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Checkbox(checked = createKidsProfile, onCheckedChange = { createKidsProfile = it })
+                    Text(text = stringResource(R.string.kids_profile_toggle), color = Color.White)
+                }
+            }
+        },
+        confirmButton = {
+            Button(onClick = {
+                if (newProfileName.isNotBlank()) {
+                    onCreateProfile(newProfileName, createKidsProfile)
+                } else {
+                    onDismiss()
+                }
+            }) {
+                Text(if (newProfileName.isNotBlank()) stringResource(R.string.create_profile) else stringResource(R.string.done))
+            }
+        },
+        dismissButton = {
+            OutlinedButton(onClick = onDismiss) {
+                Text(stringResource(R.string.cancel))
+            }
+        }
+    )
+}
+
+@Composable
+private fun SettingsDialog(
+    uiState: HomeUiState,
+    parentalControlsManager: ParentalControlsManager,
+    onDismiss: () -> Unit,
+    onNotificationsChanged: (Boolean) -> Unit,
+    onRemindersChanged: (Boolean) -> Unit,
+    onNewContentChanged: (Boolean) -> Unit,
+    onAnalyticsChanged: (Boolean) -> Unit
+) {
+    val context = LocalContext.current
+    var parentalEnabled by remember { mutableStateOf(parentalControlsManager.isEnabled) }
+    var newPin by remember { mutableStateOf("") }
+    var confirmPin by remember { mutableStateOf("") }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.settings_title)) },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                SettingSwitchRow(
+                    title = stringResource(R.string.notifications_master_toggle),
+                    checked = uiState.notificationsEnabled,
+                    onCheckedChange = onNotificationsChanged
+                )
+                SettingSwitchRow(
+                    title = stringResource(R.string.new_content_toggle),
+                    checked = uiState.newContentNotificationsEnabled,
+                    onCheckedChange = onNewContentChanged
+                )
+                SettingSwitchRow(
+                    title = stringResource(R.string.reminders_toggle),
+                    checked = uiState.reminderNotificationsEnabled,
+                    onCheckedChange = onRemindersChanged
+                )
+                SettingSwitchRow(
+                    title = stringResource(R.string.analytics_toggle),
+                    checked = uiState.analyticsEnabled,
+                    onCheckedChange = onAnalyticsChanged
+                )
+                SettingSwitchRow(
+                    title = stringResource(R.string.parental_controls_toggle),
+                    checked = parentalEnabled,
+                    onCheckedChange = {
+                        parentalEnabled = it
+                        parentalControlsManager.isEnabled = it
+                    }
+                )
+                if (parentalEnabled) {
+                    OutlinedTextField(
+                        value = newPin,
+                        onValueChange = { newPin = it.take(8) },
+                        label = { Text(stringResource(R.string.new_pin_label)) },
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true
+                    )
+                    OutlinedTextField(
+                        value = confirmPin,
+                        onValueChange = { confirmPin = it.take(8) },
+                        label = { Text(stringResource(R.string.confirm_pin_label)) },
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true
+                    )
+                }
+            }
+        },
+        confirmButton = {
+            Button(onClick = {
+                if (parentalEnabled && newPin.isNotBlank()) {
+                    if (newPin == confirmPin && newPin.length >= ParentalControlsManager.MIN_PIN_LENGTH) {
+                        parentalControlsManager.setPin(newPin)
+                        Toast.makeText(context, context.getString(R.string.pin_saved), Toast.LENGTH_SHORT).show()
+                    } else {
+                        Toast.makeText(context, context.getString(R.string.pin_mismatch), Toast.LENGTH_SHORT).show()
+                        return@Button
+                    }
+                }
+                onDismiss()
+            }) {
+                Text(stringResource(R.string.save_settings))
+            }
+        },
+        dismissButton = {
+            OutlinedButton(onClick = onDismiss) {
+                Text(stringResource(R.string.cancel))
+            }
+        }
+    )
+}
+
+@Composable
+private fun SettingSwitchRow(
+    title: String,
+    checked: Boolean,
+    onCheckedChange: (Boolean) -> Unit
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(text = title, color = Color.White, modifier = Modifier.weight(1f))
+        Switch(checked = checked, onCheckedChange = onCheckedChange)
+    }
+}
+
+@Composable
 fun ContinueWatchingRow(
     items: List<ContinueWatchingEntity>,
     onItemClick: (ContinueWatchingEntity) -> Unit,
@@ -307,7 +664,7 @@ fun ContinueWatchingRow(
 ) {
     Column(modifier = modifier.padding(vertical = 8.dp)) {
         Text(
-            text = "Continue Watching",
+            text = stringResource(R.string.continue_watching),
             modifier = Modifier.padding(start = 48.dp, bottom = 8.dp),
             color = Color.White,
             fontSize = 24.sp

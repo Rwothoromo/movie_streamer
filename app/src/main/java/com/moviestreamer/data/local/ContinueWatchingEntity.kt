@@ -1,11 +1,11 @@
 package com.moviestreamer.data.local
 
 import androidx.room.Entity
-import androidx.room.PrimaryKey
 
-@Entity(tableName = "continue_watching")
+@Entity(tableName = "continue_watching", primaryKeys = ["profileId", "contentId"])
 data class ContinueWatchingEntity(
-    @PrimaryKey val contentId: String,
+    val profileId: Long = 1L,
+    val contentId: String,
     val title: String,
     val posterPath: String?,
     val videoUrl: String,

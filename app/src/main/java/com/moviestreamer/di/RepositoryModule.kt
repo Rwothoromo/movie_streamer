@@ -11,9 +11,12 @@ val repositoryModule = module {
     single<com.moviestreamer.data.repository.TorrentRepository> { com.moviestreamer.data.repository.TorrentRepositoryImpl(get()) }
     single<LocalRepository> {
         LocalRepositoryImpl(
-            get(), // FavoriteMovieDao
-            get(), // FavoriteTvShowDao
-            get()  // ContinueWatchingDao
+            favoriteMovieDao = get(),
+            favoriteTvShowDao = get(),
+            continueWatchingDao = get(),
+            userProfileDao = get(),
+            userReviewDao = get(),
+            preferencesManager = get()
         )
     }
     single { com.moviestreamer.download.MovieDownloadManager(get()) }

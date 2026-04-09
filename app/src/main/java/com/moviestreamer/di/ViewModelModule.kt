@@ -25,6 +25,8 @@ val viewModelModule = module {
             getContinueWatchingUseCase = get(),
             getPublicDomainTvEpisodesUseCase = get(),
             getFreeIptvChannelsUseCase = get(),
+            localRepository = get(),
+            preferencesManager = get(),
             torrentRepository = get()
         )
     }
