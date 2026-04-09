@@ -25,7 +25,10 @@ data class TvShow(
     val voteAverage: Double?,
 
     @SerializedName("vote_count")
-    val voteCount: Int?
+    val voteCount: Int?,
+
+    @SerializedName("genre_ids")
+    val genreIds: List<Int> = emptyList()
 ) {
     fun getPosterUrl(): String? {
         return posterPath?.let { "https://image.tmdb.org/t/p/w500$it" }

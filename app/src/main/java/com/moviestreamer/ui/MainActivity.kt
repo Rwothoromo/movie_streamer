@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import com.moviestreamer.BuildConfig
+import com.moviestreamer.data.Movie
 import com.moviestreamer.data.Season
 import com.moviestreamer.data.TvShow
 import com.moviestreamer.player.PlayerActivity
@@ -21,6 +22,7 @@ sealed class Screen {
     object Home : Screen()
     object Search : Screen()
     object Genre : Screen()
+    data class MovieDetail(val movie: Movie) : Screen()
     data class TvDetail(val tvShow: TvShow) : Screen()
     data class TvSeason(val tvShow: TvShow, val seasonNumber: Int, val season: Season?) : Screen()
 }
@@ -53,18 +55,7 @@ class MainActivity : ComponentActivity() {
                     HomeScreen(
                         viewModel = viewModel,
                         onMovieClick = { movie ->
-                            // Only play movies with video URLs (public domain content from Archive.org)
-                            // TMDB movies are for browsing metadata only—they have no playable URLs
-                            if (movie.videoUrl != null) {
-                                val intent = Intent(this, PlayerActivity::class.java).apply {
-                                    putExtra("VIDEO_URL", movie.videoUrl)
-                                    putExtra("MOVIE_TITLE", movie.title)
-                                }
-                                startActivity(intent)
-                            } else {
-                                Toast.makeText(this, "Streaming not available for this title", Toast.LENGTH_SHORT).show()
-                                Log.i(TAG, "Movie '${movie.title}' has no playback URL (TMDB movies are metadata-only)")
-                            }
+                            currentScreen = Screen.MovieDetail(movie)
                         },
                         onTvShowClick = { tvShow ->
                             currentScreen = Screen.TvDetail(tvShow)
@@ -85,17 +76,7 @@ class MainActivity : ComponentActivity() {
                 is Screen.Search -> {
                     SearchScreen(
                         viewModel = searchViewModel,
-                        onMovieClick = { movie ->
-                            if (movie.videoUrl != null) {
-                                val intent = Intent(this, PlayerActivity::class.java).apply {
-                                    putExtra("VIDEO_URL", movie.videoUrl)
-                                    putExtra("MOVIE_TITLE", movie.title)
-                                }
-                                startActivity(intent)
-                            } else {
-                                Toast.makeText(this, "Streaming not available for this title", Toast.LENGTH_SHORT).show()
-                            }
-                        },
+                        onMovieClick = { movie -> currentScreen = Screen.MovieDetail(movie) },
                         onTvShowClick = { tvShow -> currentScreen = Screen.TvDetail(tvShow) },
                         onBack = { currentScreen = Screen.Home },
                         modifier = Modifier.fillMaxSize()
@@ -104,24 +85,35 @@ class MainActivity : ComponentActivity() {
                 is Screen.Genre -> {
                     GenreScreen(
                         viewModel = genreViewModel,
-                        onMovieClick = { movie ->
+                        onMovieClick = { movie -> currentScreen = Screen.MovieDetail(movie) },
+                        onTvShowClick = { tvShow -> currentScreen = Screen.TvDetail(tvShow) },
+                        onBack = { currentScreen = Screen.Home },
+                        modifier = Modifier.fillMaxSize()
+                    )
+                }
+                is Screen.MovieDetail -> {
+                    MovieDetailScreen(
+                        viewModel = viewModel,
+                        movie = screen.movie,
+                        onBack = { currentScreen = Screen.Home },
+                        onPlayMovie = { movie ->
                             if (movie.videoUrl != null) {
                                 val intent = Intent(this, PlayerActivity::class.java).apply {
                                     putExtra("VIDEO_URL", movie.videoUrl)
                                     putExtra("MOVIE_TITLE", movie.title)
+                                    putExtra(PlayerActivity.EXTRA_CONTENT_ID, movie.id.toString())
                                 }
                                 startActivity(intent)
                             } else {
                                 Toast.makeText(this, "Streaming not available for this title", Toast.LENGTH_SHORT).show()
                             }
                         },
-                        onTvShowClick = { tvShow -> currentScreen = Screen.TvDetail(tvShow) },
-                        onBack = { currentScreen = Screen.Home },
                         modifier = Modifier.fillMaxSize()
                     )
                 }
                 is Screen.TvDetail -> {
                     TvDetailScreen(
+                        viewModel = viewModel,
                         tvShow = screen.tvShow,
                         onBack = { currentScreen = Screen.Home },
                         onSeasonClick = { seasonNumber ->

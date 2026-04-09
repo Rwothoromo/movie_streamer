@@ -3,7 +3,10 @@ package com.moviestreamer.ui
 import app.cash.turbine.test
 import com.moviestreamer.data.Movie
 import com.moviestreamer.data.TvShow
+import com.moviestreamer.data.local.AppPreferencesManager
+import com.moviestreamer.data.local.AppPreferencesState
 import com.moviestreamer.data.local.ContinueWatchingEntity
+import com.moviestreamer.data.repository.LocalRepository
 import com.moviestreamer.domain.usecase.*
 import io.mockk.coEvery
 import io.mockk.every
@@ -40,7 +43,12 @@ class HomeViewModelTest {
     private val getPublicDomainTvEpisodesUseCase: GetPublicDomainTvEpisodesUseCase = mockk()
 
     private val getFreeIptvChannelsUseCase: GetFreeIptvChannelsUseCase = mockk()
+    private val localRepository: LocalRepository = mockk()
+    private val preferencesManager: AppPreferencesManager = mockk()
     private val torrentRepository: com.moviestreamer.data.repository.TorrentRepository = mockk()
+    private val preferencesState = kotlinx.coroutines.flow.MutableStateFlow(
+        AppPreferencesState(activeProfileId = 1L, defaultProfileId = 1L)
+    )
 
     private val sampleMovies = listOf(
         Movie(id = 1, title = "Movie 1", overview = "Desc", posterPath = null,
@@ -61,6 +69,11 @@ class HomeViewModelTest {
         every { getContinueWatchingUseCase() } returns flowOf(emptyList())
 
         // Default: all suspend use cases return success with empty lists
+        every { localRepository.getProfiles() } returns flowOf(emptyList())
+        every { localRepository.getAllReviews() } returns flowOf(emptyList())
+        coEvery { localRepository.ensureDefaultProfiles() } returns Unit
+        every { preferencesManager.state } returns preferencesState
+
         coEvery { getPopularMoviesUseCase() } returns Result.success(emptyList())
         coEvery { getTopRatedMoviesUseCase() } returns Result.success(emptyList())
         coEvery { getPublicDomainMoviesUseCase() } returns emptyList()
@@ -95,6 +108,8 @@ class HomeViewModelTest {
         getContinueWatchingUseCase = getContinueWatchingUseCase,
         getPublicDomainTvEpisodesUseCase = getPublicDomainTvEpisodesUseCase,
         getFreeIptvChannelsUseCase = getFreeIptvChannelsUseCase,
+        localRepository = localRepository,
+        preferencesManager = preferencesManager,
         torrentRepository = torrentRepository
     )
 

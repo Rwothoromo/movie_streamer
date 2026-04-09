@@ -123,6 +123,9 @@ dependencies {
     // Security – EncryptedSharedPreferences for parental controls PIN
     implementation("androidx.security:security-crypto:1.1.0-alpha06")
 
+    // Background reminders and content notifications
+    implementation("androidx.work:work-runtime-ktx:2.9.0")
+
     // Unit tests
     testImplementation("junit:junit:4.13.2")
     testImplementation("io.mockk:mockk:1.13.9")
