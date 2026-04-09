@@ -1,8 +1,23 @@
+import java.io.FileInputStream
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("com.google.devtools.ksp")
 }
+
+val keystorePropertiesFile = rootProject.file("keystore.properties")
+val keystoreProperties = Properties().apply {
+    if (keystorePropertiesFile.exists()) {
+        load(FileInputStream(keystorePropertiesFile))
+    }
+}
+
+val enableMinifyInReleaseBuilds =
+    (findProperty("android.enableMinifyInReleaseBuilds")?.toString()?.toBoolean() ?: true)
+val enableShrinkResourcesInReleaseBuilds =
+    (findProperty("android.enableShrinkResourcesInReleaseBuilds")?.toString()?.toBoolean() ?: true)
 
 android {
     namespace = "com.moviestreamer"
@@ -15,18 +30,33 @@ android {
         versionCode = 1
         versionName = "1.0"
 
-        // TMDB API key from local.properties for security
-        // To use the app with TMDB data, get a free key from: https://www.themoviedb.org/settings/api
-        // Then add to local.properties: tmdb.api.key=YOUR_ACTUAL_KEY
-        // The app works without TMDB by showing public domain content only
-        val tmdbApiKey = project.findProperty("tmdb.api.key")?.toString() ?: "3892d03413cf19a621283087d1b3d18b"
+        // TMDB API key from local.properties or CI secrets.
+        // Leave blank to run in public-domain-only mode.
+        val tmdbApiKey = project.findProperty("tmdb.api.key")?.toString()?.takeIf { it.isNotBlank() } ?: ""
         buildConfigField("String", "TMDB_API_KEY", "\"$tmdbApiKey\"")
     }
 
+    signingConfigs {
+        if (keystorePropertiesFile.exists()) {
+            create("release") {
+                storeFile = file(keystoreProperties["storeFile"] as String)
+                storePassword = keystoreProperties["storePassword"] as String
+                keyAlias = keystoreProperties["keyAlias"] as String
+                keyPassword = keystoreProperties["keyPassword"] as String
+            }
+        }
+    }
+
     buildTypes {
+        debug {
+            applicationIdSuffix = ".debug"
+        }
         release {
-            isMinifyEnabled = true
-            isShrinkResources = true
+            isMinifyEnabled = enableMinifyInReleaseBuilds
+            isShrinkResources = enableShrinkResourcesInReleaseBuilds
+            if (keystorePropertiesFile.exists()) {
+                signingConfig = signingConfigs.getByName("release")
+            }
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -56,8 +86,12 @@ android {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
+        jniLibs {
+            keepDebugSymbols += setOf("**/libjlibtorrent-*.so")
+        }
     }
 }
+
 
 dependencies {
     // Torrent streaming: FrostWire jlibtorrent (local AAR/JAR dependencies)

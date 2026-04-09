@@ -48,7 +48,6 @@ class TorrentManager(private val context: Context) {
                 val files = ti.files()
                 val videoFileIndex = (0 until files.numFiles()).maxByOrNull { files.fileSize(it) } ?: 0
                 val videoFile = File(downloadDir, files.fileName(videoFileIndex))
-                val totalSize = files.fileSize(videoFileIndex).toFloat()
                 // Wait for enough data to stream
                 while (running) {
                     val progress = handle.status().progress()
