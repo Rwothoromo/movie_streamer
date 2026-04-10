@@ -61,6 +61,7 @@ class PlayerActivity : AppCompatActivity() {
 
     private var playWhenReady = true
     private var playbackPosition = 0L
+    private var isPlayerInitializing = false
     private var saveProgressJob: Job? = null
     private var nextEpisodeJob: Job? = null
 
@@ -86,12 +87,7 @@ class PlayerActivity : AppCompatActivity() {
         buildUI()
         hideSystemUI()
 
-        // Restore continue watching position, then init player
-        lifecycleScope.launch {
-            val saved = localRepository.getContinueWatchingItem(contentId!!)
-            playbackPosition = saved?.progressMs ?: 0L
-            initializePlayer()
-        }
+        restoreProgressAndInitialize()
     }
 
     private fun buildUI() {
@@ -290,6 +286,22 @@ class PlayerActivity : AppCompatActivity() {
         root.addView(bufferingSpinner)
 
         setContentView(root)
+    }
+
+    private fun restoreProgressAndInitialize() {
+        if (player != null || isPlayerInitializing || videoUrl.isNullOrBlank()) return
+        isPlayerInitializing = true
+        lifecycleScope.launch {
+            try {
+                val saved = contentId?.let { localRepository.getContinueWatchingItem(it) }
+                playbackPosition = saved?.progressMs ?: playbackPosition
+                if (player == null) {
+                    initializePlayer()
+                }
+            } finally {
+                isPlayerInitializing = false
+            }
+        }
     }
 
     private fun initializePlayer() {
@@ -580,13 +592,7 @@ class PlayerActivity : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
-        if (player == null && !videoUrl.isNullOrBlank()) {
-            lifecycleScope.launch {
-                val saved = localRepository.getContinueWatchingItem(contentId ?: return@launch)
-                playbackPosition = saved?.progressMs ?: playbackPosition
-                initializePlayer()
-            }
-        }
+        restoreProgressAndInitialize()
     }
 
     override fun onStop() {

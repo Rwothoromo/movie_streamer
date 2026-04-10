@@ -63,16 +63,15 @@ fun HomeScreen(
     onTvShowClick: (TvShow) -> Unit,
     onSearchClick: () -> Unit,
     onGenreClick: () -> Unit,
+    onTorrentBrowseClick: () -> Unit,
     onContinueWatchingClick: (ContinueWatchingEntity) -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val context = LocalContext.current
     val parentalControlsManager = remember { ParentalControlsManager(context) }
-    var showTorrentDialog by remember { mutableStateOf(false) }
     var showSettingsDialog by remember { mutableStateOf(false) }
     var showProfileManager by remember { mutableStateOf(false) }
-    var magnetLink by remember { mutableStateOf("") }
 
     Box(
         modifier = modifier
@@ -159,64 +158,6 @@ fun HomeScreen(
                 }
             }
             else -> {
-                if (showTorrentDialog) {
-                    AlertDialog(
-                        onDismissRequest = { showTorrentDialog = false },
-                        title = { Text(stringResource(R.string.enter_magnet_link)) },
-                        text = {
-                            OutlinedTextField(
-                                value = magnetLink,
-                                onValueChange = { magnetLink = it },
-                                label = { Text(stringResource(R.string.magnet_uri)) },
-                                placeholder = { Text("magnet:?xt=urn:btih:...") },
-                                singleLine = true,
-                                modifier = Modifier.fillMaxWidth(),
-                                trailingIcon = {
-                                    if (magnetLink.isNotEmpty()) {
-                                        androidx.compose.material3.IconButton(onClick = { magnetLink = "" }) {
-                                            androidx.compose.material3.Icon(
-                                                imageVector = Icons.Filled.Close,
-                                                contentDescription = "Clear"
-                                            )
-                                        }
-                                    }
-                                }
-                            )
-                        },
-                        confirmButton = {
-                            Button(
-                                onClick = {
-                                    showTorrentDialog = false
-                                    if (magnetLink.isNotBlank()) {
-                                        val downloadDir = context.getExternalFilesDir(Environment.DIRECTORY_MOVIES) ?: context.filesDir
-                                        viewModel.startTorrentStream(magnetLink, downloadDir) { file ->
-                                            if (file != null && file.exists()) {
-                                                val intent = android.content.Intent(context, com.moviestreamer.player.PlayerActivity::class.java).apply {
-                                                    putExtra(com.moviestreamer.player.PlayerActivity.EXTRA_VIDEO_URL, file.toURI().toString())
-                                                    putExtra(com.moviestreamer.player.PlayerActivity.EXTRA_MOVIE_TITLE, "Torrent Stream")
-                                                }
-                                                context.startActivity(intent)
-                                                viewModel.stopTorrentStream()
-                                            } else {
-                                                Toast.makeText(context, context.getString(R.string.failed_torrent_stream), Toast.LENGTH_LONG).show()
-                                                viewModel.stopTorrentStream()
-                                            }
-                                        }
-                                    }
-                                },
-                                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2D7D46))
-                            ) {
-                                Text(stringResource(R.string.start_streaming), color = Color.White)
-                            }
-                        },
-                        dismissButton = {
-                            OutlinedButton(onClick = { showTorrentDialog = false }) {
-                                Text(stringResource(R.string.cancel))
-                            }
-                        }
-                    )
-                }
-
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
                     contentPadding = PaddingValues(vertical = 32.dp)
@@ -245,11 +186,11 @@ fun HomeScreen(
                             horizontalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
                             Button(
-                                onClick = { showTorrentDialog = true },
+                                onClick = onTorrentBrowseClick,
                                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2D7D46))
                             ) {
                                 Text(
-                                    text = stringResource(R.string.stream_via_torrent),
+                                    text = stringResource(R.string.browse_torrents_action),
                                     color = Color.White,
                                     fontSize = 18.sp
                                 )

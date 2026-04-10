@@ -63,10 +63,17 @@
     <string name="review_hint">Share a quick review</string>
     <string name="save_review">Save Review</string>
     <string name="stream_via_torrent">Stream via Torrent</string>
+    <string name="browse_torrents_action">🧲 Browse Torrents</string>
+    <string name="torrent_browser_title">Torrent Browser</string>
+    <string name="torrent_browser_subtitle">Browse legal sources and paste a public-domain magnet link.</string>
     <string name="enter_magnet_link">Enter Magnet Link</string>
     <string name="magnet_uri">Magnet URI</string>
     <string name="failed_torrent_stream">Failed to start torrent stream</string>
     <string name="start_streaming">Start Streaming</string>
+    <string name="browse_legal_sources">Browse Legal Torrent Sources</string>
+    <string name="open_source_site">Open Source Site</string>
+    <string name="torrent_browser_note">Only use public-domain, open-license, or personally authorized torrents.</string>
+    <string name="torrent_browser_tip">Tip: open one of the sources below, copy a magnet link, then paste it here.</string>
     <string name="search_action">🔍 Search</string>
     <string name="browse_genres_action">🎭 Browse Genres</string>
     <string name="manage_profiles">Profiles</string>

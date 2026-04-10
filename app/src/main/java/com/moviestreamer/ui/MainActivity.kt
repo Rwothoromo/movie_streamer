@@ -22,6 +22,7 @@ sealed class Screen {
     object Home : Screen()
     object Search : Screen()
     object Genre : Screen()
+    object TorrentBrowser : Screen()
     data class MovieDetail(val movie: Movie) : Screen()
     data class TvDetail(val tvShow: TvShow) : Screen()
     data class TvSeason(val tvShow: TvShow, val seasonNumber: Int, val season: Season?) : Screen()
@@ -62,6 +63,7 @@ class MainActivity : ComponentActivity() {
                         },
                         onSearchClick = { currentScreen = Screen.Search },
                         onGenreClick = { currentScreen = Screen.Genre },
+                        onTorrentBrowseClick = { currentScreen = Screen.TorrentBrowser },
                         onContinueWatchingClick = { item ->
                             val intent = Intent(this, PlayerActivity::class.java).apply {
                                 putExtra(PlayerActivity.EXTRA_VIDEO_URL, item.videoUrl)
@@ -87,6 +89,13 @@ class MainActivity : ComponentActivity() {
                         viewModel = genreViewModel,
                         onMovieClick = { movie -> currentScreen = Screen.MovieDetail(movie) },
                         onTvShowClick = { tvShow -> currentScreen = Screen.TvDetail(tvShow) },
+                        onBack = { currentScreen = Screen.Home },
+                        modifier = Modifier.fillMaxSize()
+                    )
+                }
+                is Screen.TorrentBrowser -> {
+                    TorrentBrowserScreen(
+                        viewModel = viewModel,
                         onBack = { currentScreen = Screen.Home },
                         modifier = Modifier.fillMaxSize()
                     )
