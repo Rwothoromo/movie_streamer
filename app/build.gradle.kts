@@ -35,7 +35,7 @@ android {
         minSdk = 21
         targetSdk = 34
         versionCode = 1
-        versionName = "1.0"
+        versionName = "1.0.0"
 
         // TMDB API key from Gradle properties, local.properties, or CI secrets.
         // Leave blank to run in public-domain-only mode.
@@ -102,6 +102,17 @@ android {
     }
 }
 
+android {
+    applicationVariants.configureEach {
+        outputs.configureEach {
+            val apkVersionName = versionName
+            val apkVersionCode = versionCode
+            val buildTypeName = buildType.name
+            (this as com.android.build.gradle.internal.api.BaseVariantOutputImpl).outputFileName =
+                "movie_streamer-${apkVersionName}(${apkVersionCode})-${buildTypeName}-universal.apk"
+        }
+    }
+}
 
 dependencies {
     // Torrent streaming: FrostWire jlibtorrent (local AAR/JAR dependencies)

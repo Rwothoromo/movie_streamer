@@ -305,7 +305,11 @@ class PlayerActivity : AppCompatActivity() {
     }
 
     private fun initializePlayer() {
-        playerView?.useController = !isInPictureInPictureMode
+        playerView?.useController = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            !isInPictureInPictureMode
+        } else {
+            true
+        }
         trackSelector = DefaultTrackSelector(this).apply {
             setParameters(
                 buildUponParameters()
