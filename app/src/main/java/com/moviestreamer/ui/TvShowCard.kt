@@ -19,7 +19,13 @@ import androidx.compose.material.icons.filled.Info
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
@@ -45,12 +51,15 @@ fun TvShowCard(
     var isFocused by remember { mutableStateOf(false) }
     val focusColor = colorResource(R.color.focus_highlight)
     val surfaceColor = colorResource(R.color.surface)
+    val cardScale by animateFloatAsState(targetValue = if (isFocused) 1.06f else 1f, label = "card_scale")
+    val cardElevation by animateDpAsState(targetValue = if (isFocused) 12.dp else 2.dp, label = "card_elevation")
 
     Card(
         modifier = modifier
             .width(200.dp)
             .height(300.dp)
             .padding(8.dp)
+            .scale(cardScale)
             .border(
                 border = if (isFocused) {
                     BorderStroke(4.dp, focusColor)
@@ -59,10 +68,10 @@ fun TvShowCard(
                 },
                 shape = RoundedCornerShape(8.dp)
             )
-            .focusable()
             .onFocusChanged { focusState ->
                 isFocused = focusState.isFocused
             }
+            .focusable()
             .clickable { onTvShowClick(tvShow) }
             .semantics {
                 role = Role.Button
@@ -70,6 +79,7 @@ fun TvShowCard(
         colors = CardDefaults.cardColors(
             containerColor = surfaceColor
         ),
+        elevation = CardDefaults.cardElevation(defaultElevation = cardElevation),
         shape = RoundedCornerShape(8.dp)
     ) {
         Column {
@@ -79,20 +89,41 @@ fun TvShowCard(
                     .height(250.dp)
                     .clip(RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp))
             ) {
-                if (tvShow.getPosterUrl() != null) {
+                val imageUrl = tvShow.getPosterUrl() ?: tvShow.getBackdropUrl()
+                if (imageUrl != null) {
                     AsyncImage(
-                        model = tvShow.getPosterUrl(),
+                        model = imageUrl,
                         contentDescription = tvShow.name,
                         modifier = Modifier.fillMaxSize(),
-                        contentScale = ContentScale.Crop
+                        contentScale = ContentScale.Crop,
+                        error = painterResource(R.drawable.default_movie_thumbnail)
                     )
                 } else {
-                    androidx.compose.foundation.Image(
-                        painter = painterResource(R.drawable.default_movie_thumbnail),
-                        contentDescription = tvShow.name,
-                        modifier = Modifier.fillMaxSize(),
-                        contentScale = ContentScale.Crop
+                    val placeholderColors = listOf(
+                        Color(0xFF1A237E), Color(0xFF4A148C), Color(0xFF880E4F),
+                        Color(0xFF1B5E20), Color(0xFF0D47A1), Color(0xFF4E342E),
+                        Color(0xFF37474F), Color(0xFF006064)
                     )
+                    val bgColor = placeholderColors[
+                        (tvShow.name.hashCode() and 0x7FFFFFFF) % placeholderColors.size
+                    ]
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(
+                                Brush.verticalGradient(listOf(bgColor, Color(0xFF0A0A0A)))
+                            ),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = tvShow.name,
+                            color = Color.White,
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Bold,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.padding(16.dp)
+                        )
+                    }
                 }
 
                 Box(

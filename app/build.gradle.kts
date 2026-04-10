@@ -14,6 +14,13 @@ val keystoreProperties = Properties().apply {
     }
 }
 
+val localPropertiesFile = rootProject.file("local.properties")
+val localProperties = Properties().apply {
+    if (localPropertiesFile.exists()) {
+        load(FileInputStream(localPropertiesFile))
+    }
+}
+
 val enableMinifyInReleaseBuilds =
     (findProperty("android.enableMinifyInReleaseBuilds")?.toString()?.toBoolean() ?: true)
 val enableShrinkResourcesInReleaseBuilds =
@@ -30,9 +37,12 @@ android {
         versionCode = 1
         versionName = "1.0"
 
-        // TMDB API key from local.properties or CI secrets.
+        // TMDB API key from Gradle properties, local.properties, or CI secrets.
         // Leave blank to run in public-domain-only mode.
-        val tmdbApiKey = project.findProperty("tmdb.api.key")?.toString()?.takeIf { it.isNotBlank() } ?: ""
+        val tmdbApiKey = (
+            project.findProperty("tmdb.api.key")?.toString()
+                ?: localProperties.getProperty("tmdb.api.key")
+            )?.takeIf { it.isNotBlank() } ?: ""
         buildConfigField("String", "TMDB_API_KEY", "\"$tmdbApiKey\"")
     }
 

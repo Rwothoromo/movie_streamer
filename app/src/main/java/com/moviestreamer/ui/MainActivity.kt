@@ -99,8 +99,9 @@ class MainActivity : ComponentActivity() {
                         onPlayMovie = { movie ->
                             if (movie.videoUrl != null) {
                                 val intent = Intent(this, PlayerActivity::class.java).apply {
-                                    putExtra("VIDEO_URL", movie.videoUrl)
-                                    putExtra("MOVIE_TITLE", movie.title)
+                                    putExtra(PlayerActivity.EXTRA_VIDEO_URL, movie.videoUrl)
+                                    putExtra(PlayerActivity.EXTRA_MOVIE_TITLE, movie.title)
+                                    putExtra(PlayerActivity.EXTRA_SUBTITLE_URL, movie.subtitleUrl)
                                     putExtra(PlayerActivity.EXTRA_CONTENT_ID, movie.id.toString())
                                 }
                                 startActivity(intent)

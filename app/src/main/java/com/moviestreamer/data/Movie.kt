@@ -31,7 +31,10 @@ data class Movie(
     val genreIds: List<Int> = emptyList(),
 
     // For our purposes, we'll use Archive.org URLs for actual playback
-    val videoUrl: String? = null
+    val videoUrl: String? = null,
+
+    // Optional external subtitle file (.vtt/.srt) for playback
+    val subtitleUrl: String? = null
 ) {
     fun getPosterUrl(): String? {
         return posterPath?.let { "https://image.tmdb.org/t/p/w500$it" }

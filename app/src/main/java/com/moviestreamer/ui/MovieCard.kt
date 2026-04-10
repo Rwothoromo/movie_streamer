@@ -20,7 +20,13 @@ import androidx.compose.material.icons.filled.Info
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
@@ -64,6 +70,8 @@ fun MovieCard(
     var isFocused by remember { mutableStateOf(false) }
     val focusColor = colorResource(R.color.focus_highlight)
     val surfaceColor = colorResource(R.color.surface)
+    val cardScale by animateFloatAsState(targetValue = if (isFocused) 1.06f else 1f, label = "card_scale")
+    val cardElevation by animateDpAsState(targetValue = if (isFocused) 12.dp else 2.dp, label = "card_elevation")
     val playableDesc = stringResource(R.string.play_movie_desc, movie.title)
     val browseDesc = stringResource(R.string.movie_poster_desc, movie.title)
     val cardContentDesc = if (movie.videoUrl != null) playableDesc else browseDesc
@@ -79,6 +87,7 @@ fun MovieCard(
             .width(200.dp)
             .height(300.dp)
             .padding(8.dp)
+            .scale(cardScale)
             .border(
                 border = if (isFocused) {
                     BorderStroke(4.dp, focusColor)
@@ -87,10 +96,10 @@ fun MovieCard(
                 },
                 shape = RoundedCornerShape(8.dp)
             )
-            .focusable()
             .onFocusChanged { focusState ->
                 isFocused = focusState.isFocused
             }
+            .focusable()
             .clickable { onMovieClick(movie) }
             .semantics {
                 role = Role.Button
@@ -99,6 +108,7 @@ fun MovieCard(
         colors = CardDefaults.cardColors(
             containerColor = surfaceColor
         ),
+        elevation = CardDefaults.cardElevation(defaultElevation = cardElevation),
         shape = RoundedCornerShape(8.dp)
     ) {
         Column {
@@ -109,21 +119,41 @@ fun MovieCard(
                     .height(250.dp)
                     .clip(RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp))
             ) {
-                if (movie.getPosterUrl() != null) {
+                val imageUrl = movie.getPosterUrl() ?: movie.getBackdropUrl()
+                if (imageUrl != null) {
                     AsyncImage(
-                        model = movie.getPosterUrl(),
+                        model = imageUrl,
                         contentDescription = stringResource(R.string.movie_poster_desc, movie.title),
                         modifier = Modifier.fillMaxSize(),
-                        contentScale = ContentScale.Crop
+                        contentScale = ContentScale.Crop,
+                        error = painterResource(R.drawable.default_movie_thumbnail)
                     )
                 } else {
-                    // Default movie thumbnail for movies without poster
-                    androidx.compose.foundation.Image(
-                        painter = painterResource(R.drawable.default_movie_thumbnail),
-                        contentDescription = stringResource(R.string.movie_poster_desc, movie.title),
-                        modifier = Modifier.fillMaxSize(),
-                        contentScale = ContentScale.Crop
+                    val placeholderColors = listOf(
+                        Color(0xFF1A237E), Color(0xFF4A148C), Color(0xFF880E4F),
+                        Color(0xFF1B5E20), Color(0xFF0D47A1), Color(0xFF4E342E),
+                        Color(0xFF37474F), Color(0xFF006064)
                     )
+                    val bgColor = placeholderColors[
+                        (movie.title.hashCode() and 0x7FFFFFFF) % placeholderColors.size
+                    ]
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(
+                                Brush.verticalGradient(listOf(bgColor, Color(0xFF0A0A0A)))
+                            ),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = movie.title,
+                            color = Color.White,
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Bold,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.padding(16.dp)
+                        )
+                    }
                 }
                 
                 // Download/Play/Progress UI for public domain movies

@@ -2,6 +2,7 @@ package com.moviestreamer.player
 
 import android.app.PictureInPictureParams
 import android.content.res.Configuration
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.util.Rational
@@ -17,6 +18,7 @@ import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.media3.common.C
 import androidx.media3.common.MediaItem
+import androidx.media3.common.MimeTypes
 import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
 import androidx.media3.common.TrackSelectionOverride
@@ -30,6 +32,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
+import java.io.File
 
 @androidx.media3.common.util.UnstableApi
 class PlayerActivity : AppCompatActivity() {
@@ -54,6 +57,7 @@ class PlayerActivity : AppCompatActivity() {
     private var introEndMs: Long = -1L
     private var nextEpisodeUrl: String? = null
     private var nextEpisodeTitle: String? = null
+    private var subtitleUrl: String? = null
 
     private var playWhenReady = true
     private var playbackPosition = 0L
@@ -72,6 +76,7 @@ class PlayerActivity : AppCompatActivity() {
         introEndMs = intent.getLongExtra(EXTRA_INTRO_END_MS, -1L)
         nextEpisodeUrl = intent.getStringExtra(EXTRA_NEXT_EPISODE_URL)
         nextEpisodeTitle = intent.getStringExtra(EXTRA_NEXT_EPISODE_TITLE)
+        subtitleUrl = intent.getStringExtra(EXTRA_SUBTITLE_URL)
 
         if (videoUrl.isNullOrBlank()) {
             finish()
@@ -288,7 +293,13 @@ class PlayerActivity : AppCompatActivity() {
     }
 
     private fun initializePlayer() {
-        trackSelector = DefaultTrackSelector(this)
+        trackSelector = DefaultTrackSelector(this).apply {
+            setParameters(
+                buildUponParameters()
+                    .setPreferredTextLanguage("en")
+                    .setSelectUndeterminedTextLanguage(true)
+            )
+        }
         player = ExoPlayer.Builder(this)
             .setTrackSelector(trackSelector!!)
             .build()
@@ -296,7 +307,26 @@ class PlayerActivity : AppCompatActivity() {
                 playerView?.player = exoPlayer
 
                 videoUrl?.let { url ->
-                    exoPlayer.setMediaItem(MediaItem.fromUri(url))
+                    val mediaItemBuilder = MediaItem.Builder()
+                        .setUri(resolveMediaUri(url))
+
+                    subtitleUrl
+                        ?.takeIf { it.isNotBlank() }
+                        ?.let { externalSubtitleUrl ->
+                            mediaItemBuilder.setSubtitleConfigurations(
+                                listOf(
+                                    MediaItem.SubtitleConfiguration.Builder(
+                                        resolveMediaUri(externalSubtitleUrl)
+                                    )
+                                        .setMimeType(inferSubtitleMimeType(externalSubtitleUrl))
+                                        .setLanguage("en")
+                                        .setSelectionFlags(C.SELECTION_FLAG_DEFAULT)
+                                        .build()
+                                )
+                            )
+                        }
+
+                    exoPlayer.setMediaItem(mediaItemBuilder.build())
                     exoPlayer.prepare()
                     exoPlayer.playWhenReady = playWhenReady
                     exoPlayer.seekTo(playbackPosition)
@@ -337,6 +367,24 @@ class PlayerActivity : AppCompatActivity() {
                     }
                 })
             }
+    }
+
+    private fun resolveMediaUri(value: String): Uri {
+        val parsedUri = Uri.parse(value)
+        return if (parsedUri.scheme.isNullOrBlank()) {
+            Uri.fromFile(File(value))
+        } else {
+            parsedUri
+        }
+    }
+
+    private fun inferSubtitleMimeType(value: String): String {
+        val lastPathSegment = Uri.parse(value).lastPathSegment.orEmpty()
+        return when {
+            lastPathSegment.endsWith(".vtt", ignoreCase = true) -> MimeTypes.TEXT_VTT
+            lastPathSegment.endsWith(".srt", ignoreCase = true) -> MimeTypes.APPLICATION_SUBRIP
+            else -> MimeTypes.APPLICATION_SUBRIP
+        }
     }
 
     private fun startSavingProgress() {
@@ -477,6 +525,7 @@ class PlayerActivity : AppCompatActivity() {
         contentId = "content_${nextUrl.hashCode()}"
         nextEpisodeUrl = null
         nextEpisodeTitle = null
+        subtitleUrl = null
         releasePlayer()
         playbackPosition = 0L
         initializePlayer()
@@ -584,6 +633,7 @@ class PlayerActivity : AppCompatActivity() {
     companion object {
         const val EXTRA_VIDEO_URL = "VIDEO_URL"
         const val EXTRA_MOVIE_TITLE = "MOVIE_TITLE"
+        const val EXTRA_SUBTITLE_URL = "SUBTITLE_URL"
         const val EXTRA_CONTENT_ID = "CONTENT_ID"
         const val EXTRA_INTRO_END_MS = "INTRO_END_MS"
         const val EXTRA_NEXT_EPISODE_URL = "NEXT_EPISODE_URL"

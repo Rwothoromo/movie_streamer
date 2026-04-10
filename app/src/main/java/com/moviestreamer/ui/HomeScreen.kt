@@ -2,6 +2,9 @@ package com.moviestreamer.ui
 
 import android.os.Environment
 import android.widget.Toast
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -51,6 +54,31 @@ import com.moviestreamer.data.local.ContinueWatchingEntity
 import com.moviestreamer.data.local.UserProfileEntity
 import com.moviestreamer.ui.parental.ParentalControlsManager
 
+private const val EXAMPLE_MAGNET_LINK =
+    "magnet:?xt=urn:btih:A0E86E303E372647D072924843B0D489E8AF8B84" +
+    "&dn=Jurassic+Park+%281993%29+720p+BrRip+x264+-+750mb+-+YIFY+" +
+    "&tr=http%3A%2F%2Finferno.demonoid.me%3A3407%2Fannounce" +
+    "&tr=udp%3A%2F%2Ftracker.openbittorrent.com%3A80" +
+    "&tr=udp%3A%2F%2Ftracker.ccc.de%3A80" +
+    "&tr=udp%3A%2F%2Ftracker.publicbt.com%3A80" +
+    "&tr=udp%3A%2F%2Ftracker.istole.it%3A80" +
+    "&tr=udp%3A%2F%2Ftracker.1337x.org%3A80%2Fannounce" +
+    "&tr=http%3A%2F%2Ftracker.ilibr.org%2Fannounce" +
+    "&tr=http%3A%2F%2Ftracker.ilibr.org%3A6969%2Fannounce" +
+    "&tr=http%3A%2F%2Fpow7.com%2Fannounce" +
+    "&tr=http%3A%2F%2Fopentracker.umunu.com%2Fannounce" +
+    "&tr=http%3A%2F%2Fexodus.desync.com%2Fannounce" +
+    "&tr=http%3A%2F%2F9.rarbg.com%3A2710%2Fannounce" +
+    "&tr=http%3A%2F%2Ft1.pow7.com%2Fannounce" +
+    "&tr=http%3A%2F%2F10.rarbg.com%2Fannounce" +
+    "&tr=udp%3A%2F%2Ftracker.opentrackr.org%3A1337%2Fannounce" +
+    "&tr=http%3A%2F%2Ftracker.openbittorrent.com%3A80%2Fannounce" +
+    "&tr=udp%3A%2F%2Fopentracker.i2p.rocks%3A6969%2Fannounce" +
+    "&tr=udp%3A%2F%2Ftracker.internetwarriors.net%3A1337%2Fannounce" +
+    "&tr=udp%3A%2F%2Ftracker.leechers-paradise.org%3A6969%2Fannounce" +
+    "&tr=udp%3A%2F%2Fcoppersurfer.tk%3A6969%2Fannounce" +
+    "&tr=udp%3A%2F%2Ftracker.zer0day.to%3A1337%2Fannounce"
+
 @androidx.media3.common.util.UnstableApi
 @Composable
 fun HomeScreen(
@@ -68,7 +96,7 @@ fun HomeScreen(
     var showTorrentDialog by remember { mutableStateOf(false) }
     var showSettingsDialog by remember { mutableStateOf(false) }
     var showProfileManager by remember { mutableStateOf(false) }
-    var magnetLink by remember { mutableStateOf("") }
+    var magnetLink by remember { mutableStateOf(EXAMPLE_MAGNET_LINK) }
 
     Box(
         modifier = modifier
@@ -155,23 +183,6 @@ fun HomeScreen(
                 }
             }
             else -> {
-                Row(
-                    modifier = Modifier
-                        .align(Alignment.TopEnd)
-                        .padding(24.dp)
-                ) {
-                    Button(
-                        onClick = { showTorrentDialog = true },
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2D7D46))
-                    ) {
-                        Text(
-                            text = stringResource(R.string.stream_via_torrent),
-                            color = Color.White,
-                            fontSize = 18.sp
-                        )
-                    }
-                }
-
                 if (showTorrentDialog) {
                     AlertDialog(
                         onDismissRequest = { showTorrentDialog = false },
@@ -182,7 +193,17 @@ fun HomeScreen(
                                 onValueChange = { magnetLink = it },
                                 label = { Text(stringResource(R.string.magnet_uri)) },
                                 singleLine = true,
-                                modifier = Modifier.fillMaxWidth()
+                                modifier = Modifier.fillMaxWidth(),
+                                trailingIcon = {
+                                    if (magnetLink.isNotEmpty()) {
+                                        androidx.compose.material3.IconButton(onClick = { magnetLink = "" }) {
+                                            androidx.compose.material3.Icon(
+                                                imageVector = Icons.Filled.Close,
+                                                contentDescription = "Clear"
+                                            )
+                                        }
+                                    }
+                                }
                             )
                         },
                         confirmButton = {
@@ -194,8 +215,8 @@ fun HomeScreen(
                                         viewModel.startTorrentStream(magnetLink, downloadDir) { file ->
                                             if (file != null && file.exists()) {
                                                 val intent = android.content.Intent(context, com.moviestreamer.player.PlayerActivity::class.java).apply {
-                                                    putExtra("EXTRA_VIDEO_URL", file.absolutePath)
-                                                    putExtra("EXTRA_MOVIE_TITLE", "Torrent Stream")
+                                                    putExtra(com.moviestreamer.player.PlayerActivity.EXTRA_VIDEO_URL, file.toURI().toString())
+                                                    putExtra(com.moviestreamer.player.PlayerActivity.EXTRA_MOVIE_TITLE, "Torrent Stream")
                                                 }
                                                 context.startActivity(intent)
                                                 viewModel.stopTorrentStream()
@@ -246,6 +267,16 @@ fun HomeScreen(
                             modifier = Modifier.padding(horizontal = 48.dp, vertical = 8.dp),
                             horizontalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
+                            Button(
+                                onClick = { showTorrentDialog = true },
+                                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2D7D46))
+                            ) {
+                                Text(
+                                    text = stringResource(R.string.stream_via_torrent),
+                                    color = Color.White,
+                                    fontSize = 18.sp
+                                )
+                            }
                             TextButton(onClick = onSearchClick) {
                                 Text(stringResource(R.string.search_action), color = Color.White, fontSize = 18.sp)
                             }
@@ -449,6 +480,9 @@ private fun ProfilePickerDialog(
 
     if (pendingKidsProfile != null) {
         AlertDialog(
+            containerColor = Color(0xFF1E1E1E),
+            titleContentColor = Color.White,
+            textContentColor = Color(0xFFE0E0E0),
             onDismissRequest = {
                 pendingKidsProfile = null
                 pinValue = ""
@@ -487,28 +521,47 @@ private fun ProfilePickerDialog(
     }
 
     AlertDialog(
+        containerColor = Color(0xFF1E1E1E),
+        titleContentColor = Color.White,
+        textContentColor = Color(0xFFE0E0E0),
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.choose_profile)) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 profiles.forEach { profile ->
-                    OutlinedButton(
-                        onClick = {
-                            if (profile.isKids && parentalControlsManager.isEnabled && parentalControlsManager.isPinSet) {
-                                pendingKidsProfile = profile
-                            } else {
-                                onSelectProfile(profile.id, rememberAsDefault)
-                            }
-                        },
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Text(
-                            text = if (profile.id == activeProfile?.id) {
-                                context.getString(R.string.current_profile_format, profile.avatar, profile.name)
-                            } else {
-                                context.getString(R.string.active_profile_format, profile.avatar, profile.name)
-                            }
-                        )
+                    val isActive = profile.id == activeProfile?.id
+                    if (isActive) {
+                        Button(
+                            onClick = {
+                                if (profile.isKids && parentalControlsManager.isEnabled && parentalControlsManager.isPinSet) {
+                                    pendingKidsProfile = profile
+                                } else {
+                                    onSelectProfile(profile.id, rememberAsDefault)
+                                }
+                            },
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = Color(0xFFBB86FC),
+                                contentColor = Color.Black
+                            )
+                        ) {
+                            Text(context.getString(R.string.current_profile_format, profile.avatar, profile.name))
+                        }
+                    } else {
+                        OutlinedButton(
+                            onClick = {
+                                if (profile.isKids && parentalControlsManager.isEnabled && parentalControlsManager.isPinSet) {
+                                    pendingKidsProfile = profile
+                                } else {
+                                    onSelectProfile(profile.id, rememberAsDefault)
+                                }
+                            },
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.White),
+                            border = BorderStroke(1.dp, Color(0xFF6200EE))
+                        ) {
+                            Text(context.getString(R.string.active_profile_format, profile.avatar, profile.name))
+                        }
                     }
                 }
 
@@ -523,7 +576,16 @@ private fun ProfilePickerDialog(
                     value = newProfileName,
                     onValueChange = { newProfileName = it },
                     label = { Text(stringResource(R.string.profile_name)) },
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = androidx.compose.material3.OutlinedTextFieldDefaults.colors(
+                        focusedTextColor = Color.White,
+                        unfocusedTextColor = Color(0xFFE0E0E0),
+                        focusedBorderColor = Color(0xFFBB86FC),
+                        unfocusedBorderColor = Color(0xFF6200EE),
+                        focusedLabelColor = Color(0xFFBB86FC),
+                        unfocusedLabelColor = Color(0xFF9E9E9E),
+                        cursorColor = Color(0xFFBB86FC)
+                    )
                 )
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Checkbox(checked = createKidsProfile, onCheckedChange = { createKidsProfile = it })
@@ -532,18 +594,28 @@ private fun ProfilePickerDialog(
             }
         },
         confirmButton = {
-            Button(onClick = {
-                if (newProfileName.isNotBlank()) {
-                    onCreateProfile(newProfileName, createKidsProfile)
-                } else {
-                    onDismiss()
-                }
-            }) {
+            Button(
+                onClick = {
+                    if (newProfileName.isNotBlank()) {
+                        onCreateProfile(newProfileName, createKidsProfile)
+                    } else {
+                        onDismiss()
+                    }
+                },
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFF6200EE),
+                    contentColor = Color.White
+                )
+            ) {
                 Text(if (newProfileName.isNotBlank()) stringResource(R.string.create_profile) else stringResource(R.string.done))
             }
         },
         dismissButton = {
-            OutlinedButton(onClick = onDismiss) {
+            OutlinedButton(
+                onClick = onDismiss,
+                colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.White),
+                border = BorderStroke(1.dp, Color(0xFF6200EE))
+            ) {
                 Text(stringResource(R.string.cancel))
             }
         }
@@ -565,7 +637,20 @@ private fun SettingsDialog(
     var newPin by remember { mutableStateOf("") }
     var confirmPin by remember { mutableStateOf("") }
 
+    val darkTextFieldColors = androidx.compose.material3.OutlinedTextFieldDefaults.colors(
+        focusedTextColor = Color.White,
+        unfocusedTextColor = Color(0xFFE0E0E0),
+        focusedBorderColor = Color(0xFFBB86FC),
+        unfocusedBorderColor = Color(0xFF6200EE),
+        focusedLabelColor = Color(0xFFBB86FC),
+        unfocusedLabelColor = Color(0xFF9E9E9E),
+        cursorColor = Color(0xFFBB86FC)
+    )
+
     AlertDialog(
+        containerColor = Color(0xFF1E1E1E),
+        titleContentColor = Color.White,
+        textContentColor = Color(0xFFE0E0E0),
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.settings_title)) },
         text = {
@@ -604,36 +689,48 @@ private fun SettingsDialog(
                         onValueChange = { newPin = it.take(8) },
                         label = { Text(stringResource(R.string.new_pin_label)) },
                         modifier = Modifier.fillMaxWidth(),
-                        singleLine = true
+                        singleLine = true,
+                        colors = darkTextFieldColors
                     )
                     OutlinedTextField(
                         value = confirmPin,
                         onValueChange = { confirmPin = it.take(8) },
                         label = { Text(stringResource(R.string.confirm_pin_label)) },
                         modifier = Modifier.fillMaxWidth(),
-                        singleLine = true
+                        singleLine = true,
+                        colors = darkTextFieldColors
                     )
                 }
             }
         },
         confirmButton = {
-            Button(onClick = {
-                if (parentalEnabled && newPin.isNotBlank()) {
-                    if (newPin == confirmPin && newPin.length >= ParentalControlsManager.MIN_PIN_LENGTH) {
-                        parentalControlsManager.setPin(newPin)
-                        Toast.makeText(context, context.getString(R.string.pin_saved), Toast.LENGTH_SHORT).show()
-                    } else {
-                        Toast.makeText(context, context.getString(R.string.pin_mismatch), Toast.LENGTH_SHORT).show()
-                        return@Button
+            Button(
+                onClick = {
+                    if (parentalEnabled && newPin.isNotBlank()) {
+                        if (newPin == confirmPin && newPin.length >= ParentalControlsManager.MIN_PIN_LENGTH) {
+                            parentalControlsManager.setPin(newPin)
+                            Toast.makeText(context, context.getString(R.string.pin_saved), Toast.LENGTH_SHORT).show()
+                        } else {
+                            Toast.makeText(context, context.getString(R.string.pin_mismatch), Toast.LENGTH_SHORT).show()
+                            return@Button
+                        }
                     }
-                }
-                onDismiss()
-            }) {
+                    onDismiss()
+                },
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFF6200EE),
+                    contentColor = Color.White
+                )
+            ) {
                 Text(stringResource(R.string.save_settings))
             }
         },
         dismissButton = {
-            OutlinedButton(onClick = onDismiss) {
+            OutlinedButton(
+                onClick = onDismiss,
+                colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.White),
+                border = BorderStroke(1.dp, Color(0xFF6200EE))
+            ) {
                 Text(stringResource(R.string.cancel))
             }
         }
