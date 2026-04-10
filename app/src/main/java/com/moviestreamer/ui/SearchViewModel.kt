@@ -6,7 +6,9 @@ import com.moviestreamer.data.Movie
 import com.moviestreamer.data.TvShow
 import com.moviestreamer.domain.usecase.SearchMoviesApiUseCase
 import com.moviestreamer.domain.usecase.SearchTvShowsUseCase
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -34,24 +36,35 @@ class SearchViewModel(
     fun updateQuery(query: String) {
         _uiState.value = _uiState.value.copy(query = query)
         searchJob?.cancel()
+
         if (query.isBlank()) {
             _uiState.value = _uiState.value.copy(
                 movieResults = emptyList(),
                 tvShowResults = emptyList(),
-                isLoading = false
+                isLoading = false,
+                error = null
             )
             return
         }
+
         searchJob = viewModelScope.launch {
             delay(300)
+            val activeQuery = query.trim()
             _uiState.value = _uiState.value.copy(isLoading = true, error = null)
-            val movieResult = searchMoviesApiUseCase(query)
-            val tvResult = searchTvShowsUseCase(query)
+
+            val movieDeferred = async(Dispatchers.IO) { searchMoviesApiUseCase(activeQuery) }
+            val tvDeferred = async(Dispatchers.IO) { searchTvShowsUseCase(activeQuery) }
+
+            val movieResult = movieDeferred.await()
+            val tvResult = tvDeferred.await()
+
+            if (_uiState.value.query != query) return@launch
+
             _uiState.value = _uiState.value.copy(
                 isLoading = false,
                 movieResults = movieResult.getOrDefault(emptyList()),
                 tvShowResults = tvResult.getOrDefault(emptyList()),
-                error = movieResult.exceptionOrNull()?.message
+                error = movieResult.exceptionOrNull()?.message ?: tvResult.exceptionOrNull()?.message
             )
         }
     }

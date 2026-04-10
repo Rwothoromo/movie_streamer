@@ -22,7 +22,7 @@ object StreamingCatalog {
             title = "Big Buck Bunny",
             description = "Blender Institute short film (2008). Creative Commons Attribution 3.0.",
             posterUrl = null,
-            url = "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
+            url = "https://download.blender.org/peach/bigbuckbunny_movies/BigBuckBunny_320x180.mp4",
             provider = StreamingProvider.OTHER
         ),
         DirectStream(
@@ -30,7 +30,7 @@ object StreamingCatalog {
             title = "Elephant's Dream",
             description = "First open-source animated film (2006). Creative Commons Attribution 2.5.",
             posterUrl = null,
-            url = "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4",
+            url = "https://archive.org/download/ElephantsDream/ed_1024_512kb.mp4",
             provider = StreamingProvider.OTHER
         ),
         DirectStream(

@@ -54,30 +54,6 @@ import com.moviestreamer.data.local.ContinueWatchingEntity
 import com.moviestreamer.data.local.UserProfileEntity
 import com.moviestreamer.ui.parental.ParentalControlsManager
 
-private const val EXAMPLE_MAGNET_LINK =
-    "magnet:?xt=urn:btih:A0E86E303E372647D072924843B0D489E8AF8B84" +
-    "&dn=Jurassic+Park+%281993%29+720p+BrRip+x264+-+750mb+-+YIFY+" +
-    "&tr=http%3A%2F%2Finferno.demonoid.me%3A3407%2Fannounce" +
-    "&tr=udp%3A%2F%2Ftracker.openbittorrent.com%3A80" +
-    "&tr=udp%3A%2F%2Ftracker.ccc.de%3A80" +
-    "&tr=udp%3A%2F%2Ftracker.publicbt.com%3A80" +
-    "&tr=udp%3A%2F%2Ftracker.istole.it%3A80" +
-    "&tr=udp%3A%2F%2Ftracker.1337x.org%3A80%2Fannounce" +
-    "&tr=http%3A%2F%2Ftracker.ilibr.org%2Fannounce" +
-    "&tr=http%3A%2F%2Ftracker.ilibr.org%3A6969%2Fannounce" +
-    "&tr=http%3A%2F%2Fpow7.com%2Fannounce" +
-    "&tr=http%3A%2F%2Fopentracker.umunu.com%2Fannounce" +
-    "&tr=http%3A%2F%2Fexodus.desync.com%2Fannounce" +
-    "&tr=http%3A%2F%2F9.rarbg.com%3A2710%2Fannounce" +
-    "&tr=http%3A%2F%2Ft1.pow7.com%2Fannounce" +
-    "&tr=http%3A%2F%2F10.rarbg.com%2Fannounce" +
-    "&tr=udp%3A%2F%2Ftracker.opentrackr.org%3A1337%2Fannounce" +
-    "&tr=http%3A%2F%2Ftracker.openbittorrent.com%3A80%2Fannounce" +
-    "&tr=udp%3A%2F%2Fopentracker.i2p.rocks%3A6969%2Fannounce" +
-    "&tr=udp%3A%2F%2Ftracker.internetwarriors.net%3A1337%2Fannounce" +
-    "&tr=udp%3A%2F%2Ftracker.leechers-paradise.org%3A6969%2Fannounce" +
-    "&tr=udp%3A%2F%2Fcoppersurfer.tk%3A6969%2Fannounce" +
-    "&tr=udp%3A%2F%2Ftracker.zer0day.to%3A1337%2Fannounce"
 
 @androidx.media3.common.util.UnstableApi
 @Composable
@@ -96,7 +72,7 @@ fun HomeScreen(
     var showTorrentDialog by remember { mutableStateOf(false) }
     var showSettingsDialog by remember { mutableStateOf(false) }
     var showProfileManager by remember { mutableStateOf(false) }
-    var magnetLink by remember { mutableStateOf(EXAMPLE_MAGNET_LINK) }
+    var magnetLink by remember { mutableStateOf("") }
 
     Box(
         modifier = modifier
@@ -192,6 +168,7 @@ fun HomeScreen(
                                 value = magnetLink,
                                 onValueChange = { magnetLink = it },
                                 label = { Text(stringResource(R.string.magnet_uri)) },
+                                placeholder = { Text("magnet:?xt=urn:btih:...") },
                                 singleLine = true,
                                 modifier = Modifier.fillMaxWidth(),
                                 trailingIcon = {

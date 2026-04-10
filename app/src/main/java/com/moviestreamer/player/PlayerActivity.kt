@@ -293,6 +293,7 @@ class PlayerActivity : AppCompatActivity() {
     }
 
     private fun initializePlayer() {
+        playerView?.useController = !isInPictureInPictureMode
         trackSelector = DefaultTrackSelector(this).apply {
             setParameters(
                 buildUponParameters()
@@ -602,6 +603,14 @@ class PlayerActivity : AppCompatActivity() {
 
     private fun releasePlayer() {
         saveProgressJob?.cancel()
+        nextEpisodeJob?.cancel()
+        speedOverlay?.visibility = View.GONE
+        tracksOverlay?.visibility = View.GONE
+        nextEpisodeOverlay?.visibility = View.GONE
+        playerView?.hideController()
+        playerView?.clearFocus()
+        playerView?.useController = false
+        playerView?.player = null
         player?.release()
         player = null
         trackSelector = null
