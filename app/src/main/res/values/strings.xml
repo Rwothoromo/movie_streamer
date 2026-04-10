@@ -78,6 +78,12 @@
     <string name="browse_genres_action">🎭 Browse Genres</string>
     <string name="manage_profiles">Profiles</string>
     <string name="settings_title">Settings</string>
+    <string name="about_title">About</string>
+    <string name="about_section_title">About Movie Streamer</string>
+    <string name="about_version_format">Version %1$s (%2$d)</string>
+    <string name="about_body">Movie Streamer is an Android TV app for browsing metadata and watching legal public-domain and open-license content.</string>
+    <string name="check_for_updates">Check for updates</string>
+    <string name="checking_updates">Checking for updates for version %1$s (%2$d)…</string>
     <string name="because_you_watched">Because you watched…</string>
     <string name="refresh">Refresh</string>
     <string name="dismiss">Dismiss</string>

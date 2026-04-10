@@ -44,9 +44,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.moviestreamer.BuildConfig
 import com.moviestreamer.R
 import com.moviestreamer.data.Movie
 import com.moviestreamer.data.TvShow
@@ -551,9 +553,11 @@ private fun SettingsDialog(
     onAnalyticsChanged: (Boolean) -> Unit
 ) {
     val context = LocalContext.current
+    val uriHandler = LocalUriHandler.current
     var parentalEnabled by remember { mutableStateOf(parentalControlsManager.isEnabled) }
     var newPin by remember { mutableStateOf("") }
     var confirmPin by remember { mutableStateOf("") }
+    var showAboutDialog by remember { mutableStateOf(false) }
 
     val darkTextFieldColors = androidx.compose.material3.OutlinedTextFieldDefaults.colors(
         focusedTextColor = Color.White,
@@ -564,6 +568,37 @@ private fun SettingsDialog(
         unfocusedLabelColor = Color(0xFF9E9E9E),
         cursorColor = Color(0xFFBB86FC)
     )
+
+    if (showAboutDialog) {
+        AlertDialog(
+            containerColor = Color(0xFF1E1E1E),
+            titleContentColor = Color.White,
+            textContentColor = Color(0xFFE0E0E0),
+            onDismissRequest = { showAboutDialog = false },
+            title = { Text(stringResource(R.string.about_title)) },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    Text(
+                        text = stringResource(
+                            R.string.about_version_format,
+                            BuildConfig.VERSION_NAME,
+                            BuildConfig.VERSION_CODE
+                        ),
+                        color = Color.White
+                    )
+                    Text(
+                        text = stringResource(R.string.about_body),
+                        color = Color(0xFFE0E0E0)
+                    )
+                }
+            },
+            confirmButton = {
+                Button(onClick = { showAboutDialog = false }) {
+                    Text(stringResource(R.string.done))
+                }
+            }
+        )
+    }
 
     AlertDialog(
         containerColor = Color(0xFF1E1E1E),
@@ -618,6 +653,42 @@ private fun SettingsDialog(
                         singleLine = true,
                         colors = darkTextFieldColors
                     )
+                }
+
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = stringResource(R.string.about_section_title),
+                    color = Color.White,
+                    fontSize = 18.sp
+                )
+                Text(
+                    text = stringResource(
+                        R.string.about_version_format,
+                        BuildConfig.VERSION_NAME,
+                        BuildConfig.VERSION_CODE
+                    ),
+                    color = Color(0xFFE0E0E0)
+                )
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    OutlinedButton(onClick = { showAboutDialog = true }) {
+                        Text(stringResource(R.string.about_title))
+                    }
+                    OutlinedButton(
+                        onClick = {
+                            Toast.makeText(
+                                context,
+                                context.getString(
+                                    R.string.checking_updates,
+                                    BuildConfig.VERSION_NAME,
+                                    BuildConfig.VERSION_CODE
+                                ),
+                                Toast.LENGTH_SHORT
+                            ).show()
+                            uriHandler.openUri("https://github.com/Rwothoromo/movie_streamer/releases/latest")
+                        }
+                    ) {
+                        Text(stringResource(R.string.check_for_updates))
+                    }
                 }
             }
         },
