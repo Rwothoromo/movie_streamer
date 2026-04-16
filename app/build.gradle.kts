@@ -94,6 +94,25 @@ android {
     }
 }
 
+afterEvaluate {
+    listOf("debug", "release").forEach { buildType ->
+        val taskName = "package${buildType.replaceFirstChar { it.uppercase() }}"
+        tasks.findByName(taskName)?.doLast {
+            val outputDir = project.layout.buildDirectory
+                .dir("outputs/apk/$buildType").get().asFile
+            outputDir.listFiles()
+                ?.filter { it.name.endsWith(".apk") }
+                ?.forEach { file ->
+                    val newName = "${rootProject.name.replace(Regex("([A-Z])"), "_$1").lowercase().trimStart('_')}-${android.defaultConfig.versionName}" +
+                        "(${android.defaultConfig.versionCode})-$buildType-universal.apk"
+                    if (file.name != newName) {
+                        file.renameTo(File(file.parentFile, newName))
+                    }
+                }
+        }
+    }
+}
+
 dependencies {
     // Torrent streaming: FrostWire jlibtorrent (local AAR/JAR dependencies)
     // Place the following files in app/libs/ after downloading/building:

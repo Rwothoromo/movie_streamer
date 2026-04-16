@@ -44,3 +44,4 @@ gradle/wrapper/.gradle
 # macOS metadata
 .DS_Store
 **/.DS_Store
+.kotlin/
