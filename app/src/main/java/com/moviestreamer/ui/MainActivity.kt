@@ -3,6 +3,7 @@ package com.moviestreamer.ui
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import androidx.activity.enableEdgeToEdge
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -34,7 +35,8 @@ class MainActivity : ComponentActivity() {
     
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        
+        enableEdgeToEdge()
+
         // Warning about alpha library usage
         if (BuildConfig.DEBUG) {
             Log.w(TAG, "This app uses Compose for TV libraries in alpha stage (1.0.0-alpha10). " +
