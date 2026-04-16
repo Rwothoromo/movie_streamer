@@ -3,8 +3,8 @@ import java.util.Properties
 
 plugins {
     id("com.android.application")
-    id("org.jetbrains.kotlin.android")
     id("com.google.devtools.ksp")
+    id("org.jetbrains.kotlin.plugin.compose")
 }
 
 val keystorePropertiesFile = rootProject.file("keystore.properties")
@@ -28,12 +28,12 @@ val enableShrinkResourcesInReleaseBuilds =
 
 android {
     namespace = "com.moviestreamer"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.moviestreamer"
         minSdk = 21
-        targetSdk = 34
+        targetSdk = 35
         versionCode = 1
         versionName = "1.0.0"
 
@@ -79,17 +79,9 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
 
-    kotlinOptions {
-        jvmTarget = "17"
-    }
-
     buildFeatures {
         compose = true
         buildConfig = true
-    }
-
-    composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.4"
     }
 
     packaging {
@@ -98,18 +90,6 @@ android {
         }
         jniLibs {
             keepDebugSymbols += setOf("**/libjlibtorrent-*.so")
-        }
-    }
-}
-
-android {
-    applicationVariants.configureEach {
-        outputs.configureEach {
-            val apkVersionName = versionName
-            val apkVersionCode = versionCode
-            val buildTypeName = buildType.name
-            (this as com.android.build.gradle.internal.api.BaseVariantOutputImpl).outputFileName =
-                "movie_streamer-${apkVersionName}(${apkVersionCode})-${buildTypeName}-universal.apk"
         }
     }
 }
@@ -171,9 +151,8 @@ dependencies {
     implementation("io.insert-koin:koin-androidx-compose:3.4.0")
 
     // Room for local storage
-    implementation("androidx.room:room-runtime:2.6.1")
-    implementation("androidx.room:room-ktx:2.6.1")
-    ksp("androidx.room:room-compiler:2.6.1")
+    implementation("androidx.room:room-runtime:2.7.2")
+    ksp("androidx.room:room-compiler:2.7.2")
 
     // Security – EncryptedSharedPreferences for parental controls PIN
     implementation("androidx.security:security-crypto:1.1.0-alpha06")
@@ -187,7 +166,7 @@ dependencies {
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3")
     testImplementation("app.cash.turbine:turbine:1.0.0")
     testImplementation("com.squareup.okhttp3:mockwebserver:4.12.0")
-    testImplementation("androidx.room:room-testing:2.6.1")
+    testImplementation("androidx.room:room-testing:2.7.2")
 
     // Android instrumented tests
     androidTestImplementation("androidx.test.ext:junit:1.1.5")

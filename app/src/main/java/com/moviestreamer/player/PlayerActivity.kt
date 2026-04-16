@@ -5,6 +5,7 @@ import android.content.res.Configuration
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import androidx.activity.enableEdgeToEdge
 import android.util.Rational
 import android.view.Gravity
 import android.view.KeyEvent
@@ -84,6 +85,7 @@ class PlayerActivity : AppCompatActivity() {
             return
         }
 
+        enableEdgeToEdge()
         buildUI()
         hideSystemUI()
 
